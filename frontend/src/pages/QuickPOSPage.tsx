@@ -1,11 +1,14 @@
 import React, { useState, useMemo } from 'react';
 import { 
-  FileText, X, User, Percent, Trash2, Plus, Minus, AlertTriangle, ChevronUp, ChevronDown
+  FileText, X, User, Percent, Trash2, Plus, Minus, AlertTriangle, CreditCard, ChevronRight
 } from 'lucide-react';
 import { Category, MenuItem, Settings, Order, Payment } from '../types';
 import { QuickProductCard } from '../components/v2/QuickProductCard';
 import { QuickPaymentSheet } from '../components/v2/QuickPaymentSheet';
 import { QuickTableSheet } from '../components/v2/QuickTableSheet';
+import { QuickDiscountModal } from '../components/v2/QuickDiscountModal';
+import { QuickCustomerModal } from '../components/v2/QuickCustomerModal';
+import { MobileBillSheet } from '../components/v2/MobileBillSheet';
 import { OrderSuccessModal } from '../components/v2/OrderSuccessModal';
 import { ThermalReceipt } from '../components/ThermalReceipt';
 import { QuickCartItem } from '../components/v2/OrderConfirmSheet';
@@ -17,8 +20,13 @@ interface QuickPOSPageProps {
   menuItems: MenuItem[];
   settings: Settings;
   isWsConnected?: boolean;
+  isMobileView?: boolean;
   onRefreshData: () => void;
   onOpenDrawer?: () => void;
+  tableNumber: string;
+  setTableNumber: (tbl: string) => void;
+  showTableModal: boolean;
+  setShowTableModal: (show: boolean) => void;
 }
 
 const COMMON_CHEF_NOTES = ['Less Spicy', 'Extra Spicy', 'No Onion', 'Extra Sauce', 'Pack Separate'];
@@ -27,6 +35,11 @@ export const QuickPOSPage: React.FC<QuickPOSPageProps> = ({
   categories,
   menuItems,
   settings,
+  isMobileView = false,
+  tableNumber,
+  setTableNumber,
+  showTableModal,
+  setShowTableModal,
   onRefreshData
 }) => {
   const currency = settings?.currency_symbol || '৳';
@@ -35,7 +48,6 @@ export const QuickPOSPage: React.FC<QuickPOSPageProps> = ({
   const [cartItems, setCartItems] = useState<QuickCartItem[]>([]);
   const [selectedCatId, setSelectedCatId] = useState<number | 'ALL' | 'SELECTED'>('ALL');
   const [waiterName] = useState('Staff 1');
-  const [tableNumber, setTableNumber] = useState('1');
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
 
@@ -43,11 +55,10 @@ export const QuickPOSPage: React.FC<QuickPOSPageProps> = ({
   const [discountPercent, setDiscountPercent] = useState<number>(0);
   const [discountFlat, setDiscountFlat] = useState<number>(0);
 
-  // Mobile Order Drawer Collapse/Expand
-  const [mobileCartExpanded, setMobileCartExpanded] = useState<boolean>(true);
-
   // Modals / Sheets
-  const [showTableModal, setShowTableModal] = useState(false);
+  const [showBillSheet, setShowBillSheet] = useState(false);
+  const [showDiscountModal, setShowDiscountModal] = useState(false);
+  const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [showPaymentSheet, setShowPaymentSheet] = useState(false);
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
@@ -148,7 +159,7 @@ export const QuickPOSPage: React.FC<QuickPOSPageProps> = ({
     setShowPrintModal(false);
   };
 
-  // Simulated Order object for receipt printing preview
+  // Preview Order for thermal receipt
   const currentPreviewOrder: Order = {
     id: 0,
     order_number: `ORD-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-TMP`,
@@ -184,12 +195,12 @@ export const QuickPOSPage: React.FC<QuickPOSPageProps> = ({
     <div className="flex-1 flex flex-col md:flex-row h-full overflow-hidden w-full bg-slate-100 font-sans">
       
       {/* ========================================================================= */}
-      {/* 1. PRODUCT CATALOG AREA (Left 65-70% on Desktop, Top Flex on Mobile)      */}
+      {/* 1. PRODUCT CATALOG AREA (Left 65-70% on Desktop, Full Flex on Mobile)     */}
       {/* ========================================================================= */}
       <div className="flex-1 flex flex-col h-full overflow-hidden bg-slate-50">
         
-        {/* Horizontal Category Pills Bar (Directly beneath App Bar) */}
-        <div className="px-3 py-2 bg-white border-b border-slate-200 flex items-center justify-between gap-2 shrink-0">
+        {/* Horizontal Category Pills Bar (No white container, scrollable blue pills) */}
+        <div className="px-3 pt-2.5 pb-1 flex items-center justify-between gap-2 shrink-0">
           <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none py-0.5">
             <button
               type="button"
@@ -197,10 +208,10 @@ export const QuickPOSPage: React.FC<QuickPOSPageProps> = ({
                 haptics.tap();
                 setSelectedCatId('SELECTED');
               }}
-              className={`px-3 py-1 rounded-lg text-[11px] sm:text-xs font-bold whitespace-nowrap transition touch-manipulation active:scale-95 ${
+              className={`px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold whitespace-nowrap transition touch-manipulation active:scale-95 ${
                 selectedCatId === 'SELECTED'
-                  ? 'bg-[#026cb6] text-white shadow-xs'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  ? 'bg-[#084c94] text-white shadow-xs'
+                  : 'bg-[#026cb6] text-white/95 hover:bg-[#084c94]'
               }`}
             >
               Selected ({totalItemCount})
@@ -212,10 +223,10 @@ export const QuickPOSPage: React.FC<QuickPOSPageProps> = ({
                 haptics.tap();
                 setSelectedCatId('ALL');
               }}
-              className={`px-3 py-1 rounded-lg text-[11px] sm:text-xs font-bold whitespace-nowrap transition touch-manipulation active:scale-95 ${
+              className={`px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold whitespace-nowrap transition touch-manipulation active:scale-95 ${
                 selectedCatId === 'ALL'
-                  ? 'bg-[#026cb6] text-white shadow-xs'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  ? 'bg-[#084c94] text-white shadow-xs'
+                  : 'bg-[#026cb6] text-white/95 hover:bg-[#084c94]'
               }`}
             >
               All Items
@@ -229,10 +240,10 @@ export const QuickPOSPage: React.FC<QuickPOSPageProps> = ({
                   haptics.tap();
                   setSelectedCatId(cat.id);
                 }}
-                className={`px-3 py-1 rounded-lg text-[11px] sm:text-xs font-bold whitespace-nowrap transition touch-manipulation active:scale-95 ${
+                className={`px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold whitespace-nowrap transition touch-manipulation active:scale-95 ${
                   selectedCatId === cat.id
-                    ? 'bg-[#026cb6] text-white shadow-xs'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    ? 'bg-[#084c94] text-white shadow-xs'
+                    : 'bg-[#026cb6] text-white/95 hover:bg-[#084c94]'
                 }`}
               >
                 {cat.name}
@@ -245,14 +256,18 @@ export const QuickPOSPage: React.FC<QuickPOSPageProps> = ({
           </span>
         </div>
 
-        {/* Product Cards Grid: 3-column on mobile, 4-5 columns on desktop */}
+        {/* Product Cards Grid: 3-column on mobile, 4-6 columns on desktop */}
         <div className="flex-1 p-2 sm:p-3 overflow-y-auto overscroll-contain">
           {filteredItems.length === 0 ? (
             <div className="py-20 text-center text-slate-400 text-xs sm:text-sm">
               No products found in this category.
             </div>
           ) : (
-            <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-3">
+            <div className={`grid gap-2 sm:gap-3 ${
+              isMobileView 
+                ? 'grid-cols-3' 
+                : 'grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'
+            }`}>
               {filteredItems.map((item) => (
                 <QuickProductCard
                   key={item.id}
@@ -266,59 +281,155 @@ export const QuickPOSPage: React.FC<QuickPOSPageProps> = ({
             </div>
           )}
         </div>
+
+        {/* ========================================================================= */}
+        {/* MOBILE BOTTOM DOCK (Matches User's Mockup Exactly!)                       */}
+        {/* ========================================================================= */}
+        {isMobileView && (
+          <div className="bg-white border-t border-slate-200 px-2.5 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-xl shrink-0 z-20 space-y-2">
+            
+            {/* Row 1: [ Discount ]  [ Customer ]  [ Total: ৳... ] */}
+            <div className="grid grid-cols-3 gap-2 items-center">
+              <button
+                type="button"
+                onClick={() => {
+                  haptics.tap();
+                  setShowDiscountModal(true);
+                }}
+                className={`py-2 px-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1 transition active:scale-95 shadow-xs ${
+                  discountAmount > 0
+                    ? 'bg-emerald-600 text-white'
+                    : 'bg-[#026cb6] hover:bg-[#084c94] text-white'
+                }`}
+              >
+                <Percent className="w-3.5 h-3.5" />
+                <span className="truncate">
+                  {discountPercent > 0 ? `${discountPercent}% Off` : discountFlat > 0 ? `${currency}${discountFlat} Off` : 'Discount'}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  haptics.tap();
+                  setShowCustomerModal(true);
+                }}
+                className={`py-2 px-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1 transition active:scale-95 shadow-xs ${
+                  customerName
+                    ? 'bg-blue-700 text-white'
+                    : 'bg-[#026cb6] hover:bg-[#084c94] text-white'
+                }`}
+              >
+                <User className="w-3.5 h-3.5" />
+                <span className="truncate">
+                  {customerName ? customerName : 'Customer'}
+                </span>
+              </button>
+
+              {/* White Box for Total display */}
+              <div className="border border-slate-300 bg-white rounded-lg py-1.5 px-2 text-center shadow-2xs">
+                <span className="text-[10px] text-slate-500 font-medium block leading-none">Total:</span>
+                <span className="text-xs font-black text-slate-900 leading-tight block">
+                  {currency}{grandTotal.toFixed(2)}
+                </span>
+              </div>
+            </div>
+
+            {/* Row 2: [ View Bill ]  [ Settle & Pay ]  [ Discard ] */}
+            <div className="grid grid-cols-4 gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  haptics.tap();
+                  setShowBillSheet(true);
+                }}
+                className="col-span-1 py-2.5 px-2 bg-[#026cb6] hover:bg-[#084c94] text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1 active:scale-95 shadow-xs"
+              >
+                <FileText className="w-3.5 h-3.5" />
+                <span className="truncate">Bill ({totalItemCount})</span>
+              </button>
+
+              <button
+                type="button"
+                disabled={cartItems.length === 0}
+                onClick={() => {
+                  haptics.tap();
+                  setShowPaymentSheet(true);
+                }}
+                className="col-span-2 py-2.5 px-3 bg-[#084c94] hover:bg-[#063870] text-white rounded-xl text-xs font-black flex items-center justify-center gap-1.5 active:scale-95 shadow-md disabled:opacity-40"
+              >
+                <CreditCard className="w-3.5 h-3.5" />
+                <span className="truncate">Settle &amp; Pay</span>
+              </button>
+
+              <button
+                type="button"
+                disabled={cartItems.length === 0}
+                onClick={handleDiscardPrompt}
+                className="col-span-1 py-2.5 px-2 bg-[#dc2626] hover:bg-[#b91c1c] text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1 active:scale-95 shadow-xs disabled:opacity-40"
+              >
+                <X className="w-3.5 h-3.5" />
+                <span>Discard</span>
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ========================================================================= */}
-      {/* 2. ORDER BILL SECTION: BOTTOM ON MOBILE APP, RIGHT SIDEBAR ON DESKTOP     */}
+      {/* 2. ORDER BILL SIDEBAR (DESKTOP MODE ONLY >= 768px)                        */}
       {/* ========================================================================= */}
-      <div className="w-full md:w-80 lg:w-96 flex flex-col bg-white border-t md:border-t-0 md:border-l border-slate-200 shadow-2xl md:shadow-none shrink-0 z-10 pb-[max(0.25rem,env(safe-area-inset-bottom))]">
-        
-        {/* Order Header Bar (Table #, Customer, and Mobile Collapse Toggle) */}
-        <div className="p-2.5 sm:p-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-2">
-            <span className="font-extrabold text-xs sm:text-sm text-slate-900">Current Order</span>
+      {!isMobileView && (
+        <div className="w-80 lg:w-96 flex flex-col bg-white border-l border-slate-200 shadow-none shrink-0 z-10">
+          
+          {/* Order Header Bar */}
+          <div className="p-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-2">
+              <span className="font-extrabold text-sm text-slate-900">Current Order</span>
+              <button
+                type="button"
+                onClick={() => {
+                  haptics.tap();
+                  setShowTableModal(true);
+                }}
+                className="inline-flex items-center gap-1 text-[11px] font-extrabold px-2 py-0.5 rounded-full bg-blue-100 text-[#026cb6] hover:bg-blue-200 transition"
+                title="Click to change table"
+              >
+                <span>{tableNumber.toLowerCase().includes('takeaway') ? 'Takeaway' : `Table ${tableNumber}`}</span>
+                <span className="text-[9px] underline">Change</span>
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {totalItemCount > 0 && (
+                <span className="text-[10px] font-black bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">
+                  {totalItemCount} {totalItemCount === 1 ? 'item' : 'items'}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Customer info button / preview on desktop */}
+          <div className="px-3 py-1.5 bg-slate-50 border-b border-slate-200/80 flex items-center justify-between text-xs">
+            <span className="text-slate-500 text-[11px]">
+              Customer: <strong className="text-slate-700">{customerName || 'Walk-in'}</strong>
+            </span>
             <button
               type="button"
-              onClick={() => {
-                haptics.tap();
-                setShowTableModal(true);
-              }}
-              className="inline-flex items-center gap-1 text-[11px] font-extrabold px-2 py-0.5 rounded-full bg-blue-100 text-[#026cb6] hover:bg-blue-200 transition"
-              title="Click to change table"
+              onClick={() => setShowCustomerModal(true)}
+              className="text-[#026cb6] font-bold text-[11px] hover:underline"
             >
-              <span>{tableNumber.toLowerCase().includes('takeaway') ? 'Takeaway' : `Table ${tableNumber}`}</span>
-              <span className="text-[9px] underline">Change</span>
+              {customerName ? 'Edit' : '+ Add Info'}
             </button>
           </div>
 
-          <div className="flex items-center gap-2">
-            {/* Live total count pill */}
-            {totalItemCount > 0 && (
-              <span className="text-[10px] font-black bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">
-                {totalItemCount} {totalItemCount === 1 ? 'item' : 'items'}
-              </span>
-            )}
-
-            {/* Mobile Expand / Collapse Chevron */}
-            <button
-              type="button"
-              onClick={() => setMobileCartExpanded(!mobileCartExpanded)}
-              className="md:hidden p-1 rounded-lg text-slate-400 hover:text-slate-700 bg-slate-100"
-              title={mobileCartExpanded ? 'Collapse Cart' : 'Expand Cart'}
-            >
-              {mobileCartExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
-            </button>
-          </div>
-        </div>
-
-        {/* Cart Items List: Scrollable compact list on mobile, full-height on desktop */}
-        {mobileCartExpanded && (
-          <div className="flex-1 max-h-36 md:max-h-none overflow-y-auto p-2 sm:p-3 space-y-1.5 overscroll-contain">
+          {/* Cart Items List */}
+          <div className="flex-1 overflow-y-auto p-3 space-y-1.5 overscroll-contain">
             {cartItems.length === 0 ? (
-              <div className="py-4 md:py-16 flex flex-col items-center justify-center text-slate-400 text-xs text-center space-y-1">
-                <FileText className="w-6 h-6 text-slate-300 hidden md:block" />
+              <div className="py-16 flex flex-col items-center justify-center text-slate-400 text-xs text-center space-y-1">
+                <FileText className="w-8 h-8 text-slate-300" />
                 <p className="font-semibold text-slate-500">Cart is empty</p>
-                <p className="text-[11px] text-slate-400">Click food cards to load order</p>
+                <p className="text-[11px] text-slate-400">Click food cards to add items</p>
               </div>
             ) : (
               cartItems.map((it) => (
@@ -387,89 +498,147 @@ export const QuickPOSPage: React.FC<QuickPOSPageProps> = ({
               ))
             )}
           </div>
-        )}
 
-        {/* Quick Discount Selector Chips */}
-        {cartItems.length > 0 && (
-          <div className="px-2.5 sm:px-3 pt-1.5 pb-1 border-t border-slate-200 bg-slate-50/70 shrink-0">
-            <div className="flex items-center justify-between mb-1 text-[11px]">
-              <span className="font-semibold text-slate-500">Discount:</span>
-              {discountPercent > 0 && <span className="font-bold text-emerald-600">{discountPercent}% off</span>}
-              {discountFlat > 0 && <span className="font-bold text-emerald-600">{currency}{discountFlat} off</span>}
-            </div>
-            <div className="grid grid-cols-5 gap-1">
-              {[0, 5, 10, 15, 20].map((pct) => (
-                <button
-                  key={pct}
-                  type="button"
-                  onClick={() => {
-                    haptics.tap();
-                    setDiscountPercent(pct);
-                    setDiscountFlat(0);
-                  }}
-                  className={`py-0.5 sm:py-1 rounded text-[10px] font-bold border transition active:scale-95 ${
-                    discountPercent === pct
-                      ? 'bg-[#026cb6] text-white border-[#026cb6]'
-                      : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
-                  }`}
-                >
-                  {pct === 0 ? 'Off' : `${pct}%`}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Cost Summary Box */}
-        <div className="p-2.5 sm:p-3 bg-slate-50 border-t border-slate-200 space-y-1 text-xs shrink-0">
-          <div className="flex justify-between text-slate-500 text-[11px]">
-            <span>Subtotal:</span>
-            <span className="font-semibold text-slate-700">{currency}{rawSubtotal.toFixed(2)}</span>
-          </div>
-          {discountAmount > 0 && (
-            <div className="flex justify-between text-red-600 font-semibold text-[11px]">
-              <span>Discount:</span>
-              <span>-{currency}{discountAmount.toFixed(2)}</span>
+          {/* Quick Discount Selector Chips */}
+          {cartItems.length > 0 && (
+            <div className="px-3 pt-1.5 pb-1 border-t border-slate-200 bg-slate-50/70 shrink-0">
+              <div className="flex items-center justify-between mb-1 text-[11px]">
+                <span className="font-semibold text-slate-500">Discount:</span>
+                {discountPercent > 0 && <span className="font-bold text-emerald-600">{discountPercent}% off</span>}
+                {discountFlat > 0 && <span className="font-bold text-emerald-600">{currency}{discountFlat} off</span>}
+              </div>
+              <div className="grid grid-cols-5 gap-1">
+                {[0, 5, 10, 15, 20].map((pct) => (
+                  <button
+                    key={pct}
+                    type="button"
+                    onClick={() => {
+                      haptics.tap();
+                      setDiscountPercent(pct);
+                      setDiscountFlat(0);
+                    }}
+                    className={`py-1 rounded text-[10px] font-bold border transition active:scale-95 ${
+                      discountPercent === pct
+                        ? 'bg-[#026cb6] text-white border-[#026cb6]'
+                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
+                    }`}
+                  >
+                    {pct === 0 ? 'Off' : `${pct}%`}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
-          <div className="flex justify-between text-slate-500 text-[11px]">
-            <span>Tax ({taxRate}%):</span>
-            <span className="font-semibold text-slate-700">{currency}{taxAmount.toFixed(2)}</span>
+
+          {/* Cost Summary Box */}
+          <div className="p-3 bg-slate-50 border-t border-slate-200 space-y-1 text-xs shrink-0">
+            <div className="flex justify-between text-slate-500 text-[11px]">
+              <span>Subtotal:</span>
+              <span className="font-semibold text-slate-700">{currency}{rawSubtotal.toFixed(2)}</span>
+            </div>
+            {discountAmount > 0 && (
+              <div className="flex justify-between text-red-600 font-semibold text-[11px]">
+                <span>Discount:</span>
+                <span>-{currency}{discountAmount.toFixed(2)}</span>
+              </div>
+            )}
+            <div className="flex justify-between text-slate-500 text-[11px]">
+              <span>Tax ({taxRate}%):</span>
+              <span className="font-semibold text-slate-700">{currency}{taxAmount.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-sm font-extrabold text-slate-900 pt-1 border-t border-slate-200">
+              <span>Total:</span>
+              <span className="text-[#026cb6] text-base">{currency}{grandTotal.toFixed(2)}</span>
+            </div>
           </div>
-          <div className="flex justify-between text-sm font-extrabold text-slate-900 pt-1 border-t border-slate-200">
-            <span>Total:</span>
-            <span className="text-[#026cb6] text-base">{currency}{grandTotal.toFixed(2)}</span>
+
+          {/* Action Buttons: [ Settle & Pay ] and [ Discard ] */}
+          <div className="p-3 bg-white border-t border-slate-200 grid grid-cols-3 gap-2 shrink-0">
+            <button
+              type="button"
+              disabled={cartItems.length === 0}
+              onClick={() => {
+                haptics.tap();
+                setShowPaymentSheet(true);
+              }}
+              className="col-span-2 py-2.5 bg-[#026cb6] hover:bg-[#025a98] active:bg-[#024a7d] text-white rounded-xl text-xs sm:text-sm font-black shadow-md transition disabled:opacity-40 touch-manipulation active:scale-95"
+            >
+              Settle &amp; Pay ({currency}{grandTotal.toFixed(2)})
+            </button>
+
+            <button
+              type="button"
+              onClick={handleDiscardPrompt}
+              disabled={cartItems.length === 0}
+              className="col-span-1 py-2.5 bg-[#dc2626] hover:bg-[#b91c1c] active:bg-[#991b1b] text-white rounded-xl text-xs sm:text-sm font-bold shadow-xs transition disabled:opacity-40 touch-manipulation active:scale-95"
+            >
+              Discard
+            </button>
           </div>
         </div>
-
-        {/* Action Buttons: [ Settle & Pay ] and [ Discard ] (No KOT, No Quick Print) */}
-        <div className="p-2 sm:p-3 bg-white border-t border-slate-200 grid grid-cols-3 gap-2 shrink-0">
-          <button
-            type="button"
-            disabled={cartItems.length === 0}
-            onClick={() => {
-              haptics.tap();
-              setShowPaymentSheet(true);
-            }}
-            className="col-span-2 py-2.5 bg-[#026cb6] hover:bg-[#025a98] active:bg-[#024a7d] text-white rounded-xl text-xs sm:text-sm font-black shadow-md transition disabled:opacity-40 touch-manipulation active:scale-95"
-          >
-            Settle &amp; Pay ({currency}{grandTotal.toFixed(2)})
-          </button>
-
-          <button
-            type="button"
-            onClick={handleDiscardPrompt}
-            disabled={cartItems.length === 0}
-            className="col-span-1 py-2.5 bg-[#dc2626] hover:bg-[#b91c1c] active:bg-[#991b1b] text-white rounded-xl text-xs sm:text-sm font-bold shadow-xs transition disabled:opacity-40 touch-manipulation active:scale-95"
-          >
-            Discard
-          </button>
-        </div>
-      </div>
+      )}
 
       {/* ========================================================================= */}
       {/* 3. MODALS & SHEETS                                                        */}
       {/* ========================================================================= */}
+
+      {/* Mobile Bill Sheet */}
+      <MobileBillSheet
+        isOpen={showBillSheet}
+        cartItems={cartItems}
+        currencySymbol={currency}
+        tableNumber={tableNumber}
+        customerName={customerName}
+        rawSubtotal={rawSubtotal}
+        discountAmount={discountAmount}
+        taxRate={taxRate}
+        taxAmount={taxAmount}
+        grandTotal={grandTotal}
+        onAddItem={handleAddItem}
+        onDecrementItem={handleDecrementItem}
+        onRemoveItem={handleRemoveItem}
+        onUpdateItemNote={handleUpdateItemNote}
+        onOpenDiscount={() => {
+          setShowBillSheet(false);
+          setShowDiscountModal(true);
+        }}
+        onOpenCustomer={() => {
+          setShowBillSheet(false);
+          setShowCustomerModal(true);
+        }}
+        onOpenPayment={() => {
+          setShowBillSheet(false);
+          setShowPaymentSheet(true);
+        }}
+        onDiscard={handleDiscardPrompt}
+        onClose={() => setShowBillSheet(false)}
+      />
+
+      {/* Quick Discount Modal */}
+      <QuickDiscountModal
+        isOpen={showDiscountModal}
+        discountPercent={discountPercent}
+        discountFlat={discountFlat}
+        currencySymbol={currency}
+        subtotal={rawSubtotal}
+        onApply={(pct, flat) => {
+          setDiscountPercent(pct);
+          setDiscountFlat(flat);
+        }}
+        onClose={() => setShowDiscountModal(false)}
+      />
+
+      {/* Quick Customer Modal */}
+      <QuickCustomerModal
+        isOpen={showCustomerModal}
+        customerName={customerName}
+        customerPhone={customerPhone}
+        onSave={(name, phone) => {
+          setCustomerName(name);
+          setCustomerPhone(phone);
+        }}
+        onClose={() => setShowCustomerModal(false)}
+      />
 
       {/* Quick Table Selector Sheet */}
       {showTableModal && (
@@ -484,47 +653,14 @@ export const QuickPOSPage: React.FC<QuickPOSPageProps> = ({
         />
       )}
 
-      {/* Discard Confirmation Sheet */}
-      {showDiscardConfirm && (
-        <div className="fixed inset-0 z-50 flex flex-col justify-end sm:justify-center items-center bg-black/60 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in">
-          <div className="bg-white text-slate-800 rounded-t-3xl sm:rounded-2xl p-5 w-full max-w-xs shadow-2xl border border-slate-200 text-center space-y-4 animate-in slide-in-from-bottom duration-200">
-            <div className="w-12 h-12 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto">
-              <AlertTriangle className="w-6 h-6" />
-            </div>
-            <div>
-              <h3 className="font-extrabold text-base text-slate-900">Discard Current Order?</h3>
-              <p className="text-xs text-slate-500 mt-1">
-                This will clear {totalItemCount} item(s) from Table {tableNumber}.
-              </p>
-            </div>
-            <div className="grid grid-cols-2 gap-2 pt-1">
-              <button
-                type="button"
-                onClick={() => setShowDiscardConfirm(false)}
-                className="py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold"
-              >
-                Keep Order
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirmDiscard}
-                className="py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold shadow-xs"
-              >
-                Yes, Discard
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Payment Sheet */}
+      {/* Quick Payment Sheet */}
       {showPaymentSheet && (
         <QuickPaymentSheet
           items={cartItems}
           settings={settings}
-          customerName={customerName || `Table ${tableNumber}`}
-          orderType={tableNumber.toLowerCase().includes('takeaway') ? 'TAKEAWAY' : 'DINE_IN'}
+          customerName={customerName}
           tableNumber={tableNumber}
+          orderType={tableNumber.toLowerCase().includes('takeaway') ? 'TAKEAWAY' : 'DINE_IN'}
           discountPercent={discountPercent}
           discountFlat={discountFlat}
           onBack={() => setShowPaymentSheet(false)}
@@ -537,8 +673,8 @@ export const QuickPOSPage: React.FC<QuickPOSPageProps> = ({
         />
       )}
 
-      {/* Success Modal */}
-      {successResult && !showPrintModal && (
+      {/* Order Success Modal */}
+      {successResult && (
         <OrderSuccessModal
           order={successResult.order}
           payment={successResult.payment}
@@ -551,14 +687,47 @@ export const QuickPOSPage: React.FC<QuickPOSPageProps> = ({
       {/* Thermal Receipt Print Modal */}
       {showPrintModal && (
         <ThermalReceipt
-          order={successResult ? successResult.order : currentPreviewOrder}
+          order={successResult?.order || currentPreviewOrder}
+          payment={successResult?.payment}
           settings={settings}
-          payment={successResult?.payment || null}
-          paperSize={settings.printer_paper_size || '80mm'}
-          autoPrint={false}
+          paperSize={settings?.printer_paper_size || '80mm'}
           onClose={() => setShowPrintModal(false)}
         />
       )}
+
+      {/* Discard Confirmation Dialog */}
+      {showDiscardConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-5 text-center space-y-4 shadow-2xl border border-slate-200">
+            <div className="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mx-auto">
+              <AlertTriangle className="w-6 h-6 stroke-[2.5]" />
+            </div>
+            <div>
+              <h3 className="font-extrabold text-base text-slate-900">Discard Current Order?</h3>
+              <p className="text-xs text-slate-500 mt-1">
+                This will remove all {totalItemCount} items from the cart. This action cannot be undone.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setShowDiscardConfirm(false)}
+                className="py-2.5 rounded-xl font-bold text-xs bg-slate-100 text-slate-700 hover:bg-slate-200 transition"
+              >
+                Keep Order
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDiscard}
+                className="py-2.5 rounded-xl font-extrabold text-xs bg-red-600 text-white hover:bg-red-700 transition shadow-xs"
+              >
+                Yes, Discard
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

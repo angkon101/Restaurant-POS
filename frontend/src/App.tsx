@@ -12,6 +12,25 @@ import { Agentation } from 'agentation';
 export const App: React.FC = () => {
   const [currentTab, setCurrentTab] = useState<NavTab>('POS');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [tableNumber, setTableNumber] = useState('1');
+  const [showTableModal, setShowTableModal] = useState(false);
+
+  // Responsive / View Mode State
+  const [viewModeOverride, setViewModeOverride] = useState<'AUTO' | 'MOBILE' | 'DESKTOP'>('AUTO');
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const isMobileViewport = windowWidth < 768;
+  const isMobileView = viewModeOverride === 'MOBILE' 
+    ? true 
+    : viewModeOverride === 'DESKTOP' 
+      ? false 
+      : isMobileViewport;
   
   // Application Data States
   const [settings, setSettings] = useState<Settings>({
@@ -107,62 +126,82 @@ export const App: React.FC = () => {
   }, [loadData]);
 
   return (
-    <div className="flex flex-col h-[100dvh] w-screen overflow-hidden bg-slate-100 text-slate-800 font-sans">
-      {/* Backend Disconnected Notice */}
-      {backendError && (
-        <div className="bg-red-900/90 text-white text-xs px-4 py-2 text-center font-bold flex items-center justify-center gap-2 no-print border-b border-red-700">
-          <span>⚠️ {backendError}</span>
-          <button
-            onClick={() => loadData()}
-            className="underline ml-2 hover:text-amber-300"
-          >
-            Retry Connection
-          </button>
-        </div>
-      )}
+    <div className={`h-[100dvh] w-screen overflow-hidden bg-slate-200 text-slate-800 font-sans flex ${
+      isMobileView && !isMobileViewport ? 'justify-center items-center p-0 lg:p-4' : ''
+    }`}>
+      {/* App Shell Container (Phone mock container if previewing mobile on desktop screen) */}
+      <div className={`flex flex-col h-full bg-slate-100 overflow-hidden ${
+        isMobileView && !isMobileViewport 
+          ? 'w-full max-w-md shadow-2xl rounded-2xl border border-slate-300 ring-8 ring-slate-900/10' 
+          : 'w-full'
+      }`}>
 
-      {/* App Bar (Unified across Desktop and Mobile) */}
-      <Navbar
-        currentTab={currentTab}
-        onSelectTab={setCurrentTab}
-        settings={settings}
-        isWsConnected={isWsConnected}
-      />
-
-      {/* Main View Area */}
-      <main className="flex-1 flex overflow-hidden">
-        {/* Simple Mobile-First Order POS */}
-        {currentTab === 'POS' && (
-          <QuickPOSPage
-            categories={categories}
-            menuItems={menuItems}
-            settings={settings}
-            isWsConnected={isWsConnected}
-            onRefreshData={loadData}
-            onOpenDrawer={() => setIsDrawerOpen(true)}
-          />
+        {/* Backend Disconnected Notice */}
+        {backendError && (
+          <div className="bg-red-900/90 text-white text-xs px-4 py-2 text-center font-bold flex items-center justify-center gap-2 no-print border-b border-red-700">
+            <span>⚠️ {backendError}</span>
+            <button
+              onClick={() => loadData()}
+              className="underline ml-2 hover:text-amber-300"
+            >
+              Retry Connection
+            </button>
+          </div>
         )}
 
-        {/* Daily Sales & Z-Report */}
-        {currentTab === 'REPORTS' && (
-          <ReportsPage
-            settings={settings}
-            paperSize={settings.printer_paper_size || '80mm'}
-            onBackToPOS={() => setCurrentTab('POS')}
-          />
-        )}
+        {/* Unified App Bar (Adaptive Mobile vs Desktop) */}
+        <Navbar
+          currentTab={currentTab}
+          onSelectTab={setCurrentTab}
+          settings={settings}
+          isWsConnected={isWsConnected}
+          isMobileView={isMobileView}
+          tableNumber={tableNumber}
+          onOpenDrawer={() => setIsDrawerOpen(true)}
+          onOpenTableModal={() => setShowTableModal(true)}
+          onToggleViewMode={() => setViewModeOverride(isMobileView ? 'DESKTOP' : 'MOBILE')}
+        />
 
-        {/* Menu Catalog Admin */}
-        {currentTab === 'SETTINGS' && (
-          <SettingsPage
-            categories={categories}
-            menuItems={menuItems}
-            currencySymbol={settings.currency_symbol || '৳'}
-            onRefreshData={loadData}
-            onBackToPOS={() => setCurrentTab('POS')}
-          />
-        )}
-      </main>
+        {/* Main View Area */}
+        <main className="flex-1 flex overflow-hidden">
+          {/* Order POS Screen */}
+          {currentTab === 'POS' && (
+            <QuickPOSPage
+              categories={categories}
+              menuItems={menuItems}
+              settings={settings}
+              isWsConnected={isWsConnected}
+              isMobileView={isMobileView}
+              tableNumber={tableNumber}
+              setTableNumber={setTableNumber}
+              showTableModal={showTableModal}
+              setShowTableModal={setShowTableModal}
+              onRefreshData={loadData}
+              onOpenDrawer={() => setIsDrawerOpen(true)}
+            />
+          )}
+
+          {/* Daily Sales & Z-Report */}
+          {currentTab === 'REPORTS' && (
+            <ReportsPage
+              settings={settings}
+              paperSize={settings.printer_paper_size || '80mm'}
+              onBackToPOS={() => setCurrentTab('POS')}
+            />
+          )}
+
+          {/* Menu Catalog Admin */}
+          {currentTab === 'SETTINGS' && (
+            <SettingsPage
+              categories={categories}
+              menuItems={menuItems}
+              currencySymbol={settings.currency_symbol || '৳'}
+              onRefreshData={loadData}
+              onBackToPOS={() => setCurrentTab('POS')}
+            />
+          )}
+        </main>
+      </div>
 
       {/* Mobile Slide-Out Navigation Drawer */}
       <MobileNavDrawer
