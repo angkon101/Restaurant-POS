@@ -80,34 +80,34 @@ export const QuickProductCard: React.FC<QuickProductCardProps> = ({
 
       {/* Bottom: Stepper Row with Red (-) and Green (+) */}
       <div
-        className="px-2 pb-2.5 pt-1 flex items-center justify-center gap-2"
+        className="px-2 pb-2.5 pt-1 flex items-center justify-center gap-2.5 sm:gap-3"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           type="button"
           onClick={handleDecrementClick}
           disabled={quantity <= 0}
-          className={`w-7 h-7 rounded-full flex items-center justify-center text-white font-bold transition shadow-xs active:scale-90 touch-manipulation ${
+          className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold transition shadow-xs active:scale-90 touch-manipulation ${
             quantity > 0
-              ? 'bg-red-500 hover:bg-red-600 active:bg-red-700'
-              : 'bg-red-200 text-red-100 cursor-not-allowed opacity-40'
+              ? 'bg-red-500 hover:bg-red-600 active:bg-red-700 text-white shadow-red-500/20'
+              : 'bg-red-100/70 text-red-300 border border-red-200/50 cursor-not-allowed opacity-60'
           }`}
           title="Decrease"
         >
-          <Minus className="w-3.5 h-3.5 stroke-[3]" />
+          <Minus className="w-5 h-5 stroke-[3]" />
         </button>
 
-        <span className="font-extrabold text-xs sm:text-sm text-slate-800 w-5 text-center">
+        <span className="font-black text-sm sm:text-base text-slate-800 w-6 text-center select-none">
           {quantity}
         </span>
 
         <button
           type="button"
           onClick={handleAddClick}
-          className="w-7 h-7 rounded-full bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 active:scale-90 text-white flex items-center justify-center font-bold transition shadow-xs touch-manipulation"
+          className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 active:scale-90 text-white flex items-center justify-center font-bold transition shadow-xs shadow-emerald-500/20 touch-manipulation"
           title="Increase"
         >
-          <Plus className="w-3.5 h-3.5 stroke-[3]" />
+          <Plus className="w-5 h-5 stroke-[3]" />
         </button>
       </div>
     </div>

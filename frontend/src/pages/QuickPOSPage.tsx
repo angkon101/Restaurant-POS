@@ -374,28 +374,28 @@ export const QuickPOSPage: React.FC<QuickPOSPageProps> = ({
                           haptics.tap();
                           handleDecrementItem(it.menuItem);
                         }}
-                        className="w-5 h-5 flex items-center justify-center bg-white border border-slate-200 rounded text-slate-700 hover:bg-slate-100 active:scale-90"
+                        className="w-6 h-6 flex items-center justify-center bg-white border border-slate-300 rounded-md text-slate-700 hover:bg-slate-100 active:scale-90"
                       >
-                        <Minus className="w-3 h-3" />
+                        <Minus className="w-3.5 h-3.5" />
                       </button>
-                      <span className="font-extrabold text-xs w-4 text-center">{it.quantity}</span>
+                      <span className="font-extrabold text-xs w-5 text-center">{it.quantity}</span>
                       <button
                         type="button"
                         onClick={() => {
                           haptics.tap();
                           handleAddItem(it.menuItem);
                         }}
-                        className="w-5 h-5 flex items-center justify-center bg-[#026cb6] text-white rounded hover:bg-[#025a98] active:scale-90"
+                        className="w-6 h-6 flex items-center justify-center bg-[#026cb6] text-white rounded-md hover:bg-[#025a98] active:scale-90"
                       >
-                        <Plus className="w-3 h-3" />
+                        <Plus className="w-3.5 h-3.5" />
                       </button>
                       <button
                         type="button"
                         onClick={() => handleRemoveItem(it.menuItem.id)}
-                        className="p-1 text-slate-400 hover:text-red-500 ml-0.5"
+                        className="p-1 text-slate-400 hover:text-red-500 ml-1"
                         title="Remove"
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
@@ -404,33 +404,31 @@ export const QuickPOSPage: React.FC<QuickPOSPageProps> = ({
             )}
           </div>
 
-          {/* Quick Discount Selector Chips */}
+          {/* Custom Discount Amount Box */}
           {cartItems.length > 0 && (
-            <div className="px-3 pt-1.5 pb-1 border-t border-slate-200 bg-slate-50/70 shrink-0">
-              <div className="flex items-center justify-between mb-1 text-[11px]">
-                <span className="font-semibold text-slate-500">Discount:</span>
-                {discountPercent > 0 && <span className="font-bold text-emerald-600">{discountPercent}% off</span>}
-                {discountFlat > 0 && <span className="font-bold text-emerald-600">{currency}{discountFlat} off</span>}
-              </div>
-              <div className="grid grid-cols-5 gap-1">
-                {[0, 5, 10, 15, 20].map((pct) => (
-                  <button
-                    key={pct}
-                    type="button"
-                    onClick={() => {
-                      haptics.tap();
-                      setDiscountPercent(pct);
-                      setDiscountFlat(0);
+            <div className="px-3.5 py-2.5 border-t border-slate-200 bg-slate-50/80 shrink-0">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-bold text-slate-700">
+                  Discount Amount:
+                </span>
+                <div className="relative w-36">
+                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">
+                    {currency}
+                  </span>
+                  <input
+                    type="number"
+                    min="0"
+                    max={rawSubtotal}
+                    value={discountFlat === 0 ? '' : discountFlat}
+                    onChange={(e) => {
+                      const val = Math.max(0, parseFloat(e.target.value) || 0);
+                      setDiscountFlat(val);
+                      setDiscountPercent(0);
                     }}
-                    className={`py-1 rounded text-[10px] font-bold border transition active:scale-95 ${
-                      discountPercent === pct
-                        ? 'bg-[#026cb6] text-white border-[#026cb6]'
-                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
-                    }`}
-                  >
-                    {pct === 0 ? 'Off' : `${pct}%`}
-                  </button>
-                ))}
+                    placeholder="0"
+                    className="w-full pl-6 pr-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-black text-slate-800 text-right focus:outline-none focus:ring-2 focus:ring-[#026cb6]"
+                  />
+                </div>
               </div>
             </div>
           )}
