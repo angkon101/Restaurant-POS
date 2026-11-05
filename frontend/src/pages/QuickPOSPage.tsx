@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { 
-  ArrowLeft, FileText, Utensils, Printer, X, Tag, User, 
-  Search, Wifi, BatteryMedium, Check, Percent, Sparkles
+  ArrowLeft, FileText, Utensils, Printer, X, User, 
+  Wifi, BatteryMedium, Percent
 } from 'lucide-react';
 import { Category, MenuItem, Settings, Order, Payment } from '../types';
 import { QuickProductCard } from '../components/v2/QuickProductCard';
@@ -30,7 +30,6 @@ export const QuickPOSPage: React.FC<QuickPOSPageProps> = ({
   // Order State
   const [cartItems, setCartItems] = useState<QuickCartItem[]>([]);
   const [selectedCatId, setSelectedCatId] = useState<number | 'ALL' | 'SELECTED'>('ALL');
-  const [searchQuery, setSearchQuery] = useState('');
   const [waiterName, setWaiterName] = useState('Staff 1');
   const [tableNumber, setTableNumber] = useState('1');
   const [customerName, setCustomerName] = useState('');
@@ -59,26 +58,18 @@ export const QuickPOSPage: React.FC<QuickPOSPageProps> = ({
   const taxAmount = Math.round((subtotalAfterDiscount * (taxRate / 100)) * 100) / 100;
   const grandTotal = Math.round((subtotalAfterDiscount + taxAmount) * 100) / 100;
 
-  // Filter products
+  // Filter products by category
   const filteredItems = useMemo(() => {
     return menuItems.filter(item => {
-      // Category filter
-      let matchesCat = true;
       if (selectedCatId === 'SELECTED') {
-        const inCart = cartItems.some(it => it.menuItem.id === item.id);
-        matchesCat = inCart;
-      } else if (selectedCatId !== 'ALL') {
-        matchesCat = item.category_id === selectedCatId;
+        return cartItems.some(it => it.menuItem.id === item.id);
       }
-
-      // Search filter
-      const matchesSearch = !searchQuery.trim() || 
-        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (item.sku && item.sku.toLowerCase().includes(searchQuery.toLowerCase()));
-
-      return matchesCat && matchesSearch;
+      if (selectedCatId !== 'ALL') {
+        return item.category_id === selectedCatId;
+      }
+      return true;
     });
-  }, [menuItems, selectedCatId, searchQuery, cartItems]);
+  }, [menuItems, selectedCatId, cartItems]);
 
   // Cart actions
   const getItemQuantity = (itemId: number) => {
@@ -240,46 +231,8 @@ export const QuickPOSPage: React.FC<QuickPOSPageProps> = ({
           </div>
         </div>
 
-        {/* Inputs Bar: Search & Select Waiter */}
-        <div className="p-3 bg-white border-b border-slate-200/80 grid grid-cols-2 gap-2 shadow-xs">
-          {/* Search Input */}
-          <div className="relative">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search..."
-              className="w-full bg-slate-50 border border-slate-300 rounded-lg pl-3 pr-7 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#026cb6] focus:bg-white transition"
-            />
-            {searchQuery ? (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-2 top-2 text-xs text-slate-400 hover:text-slate-600"
-              >
-                ✕
-              </button>
-            ) : (
-              <Search className="w-3.5 h-3.5 absolute right-2.5 top-2.5 text-slate-400 pointer-events-none" />
-            )}
-          </div>
-
-          {/* Waiter Dropdown */}
-          <div>
-            <select
-              value={waiterName}
-              onChange={(e) => setWaiterName(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-[#026cb6] focus:bg-white transition"
-            >
-              <option value="Staff 1">Staff 1</option>
-              <option value="Staff 2">Staff 2</option>
-              <option value="Rahul M.">Rahul M.</option>
-              <option value="Counter / Self">Counter / Self</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Scrollable Category Filter Pills */}
-        <div className="bg-white px-3 py-2 border-b border-slate-200/80 flex items-center gap-1.5 overflow-x-auto scrollbar-none select-none">
+        {/* Scrollable Category Filter Pills (No white border or background) */}
+        <div className="px-3 pt-3 pb-2 flex items-center gap-1.5 overflow-x-auto scrollbar-none select-none">
           {/* Selected items filter pill */}
           <button
             type="button"
