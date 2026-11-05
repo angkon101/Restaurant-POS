@@ -11,6 +11,8 @@ interface QuickPaymentSheetProps {
   customerName: string;
   orderType: 'TAKEAWAY' | 'DINE_IN';
   tableNumber: string;
+  discountPercent?: number;
+  discountFlat?: number;
   onBack: () => void;
   onClose: () => void;
   onSuccess: (result: { order: any; payment: any }) => void;
@@ -22,16 +24,22 @@ export const QuickPaymentSheet: React.FC<QuickPaymentSheetProps> = ({
   customerName,
   orderType,
   tableNumber,
+  discountPercent = 0,
+  discountFlat = 0,
   onBack,
   onClose,
   onSuccess
 }) => {
   const currency = settings?.currency_symbol || '৳';
   
-  const subtotal = items.reduce((sum, it) => sum + (it.menuItem.price * it.quantity), 0);
+  const rawSubtotal = items.reduce((sum, it) => sum + (it.menuItem.price * it.quantity), 0);
+  const discountAmount = discountPercent > 0 
+    ? Math.round(rawSubtotal * (discountPercent / 100))
+    : Math.min(rawSubtotal, discountFlat);
+  const subtotalAfterDiscount = Math.max(0, rawSubtotal - discountAmount);
   const taxRate = settings?.tax_percentage || 5.0;
-  const taxAmount = (subtotal * (taxRate / 100));
-  const grandTotal = Math.round((subtotal + taxAmount) * 100) / 100;
+  const taxAmount = Math.round((subtotalAfterDiscount * (taxRate / 100)) * 100) / 100;
+  const grandTotal = Math.round((subtotalAfterDiscount + taxAmount) * 100) / 100;
 
   const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'CARD' | 'MOBILE'>('CASH');
   const [tenderedStr, setTenderedStr] = useState<string>(grandTotal.toFixed(2));
@@ -71,6 +79,8 @@ export const QuickPaymentSheet: React.FC<QuickPaymentSheetProps> = ({
         payment_method: paymentMethod,
         amount_tendered: paymentMethod === 'CASH' ? tenderedAmount : grandTotal,
         change_returned: paymentMethod === 'CASH' ? changeDue : 0,
+        discount_percent: discountPercent,
+        discount_amount: discountAmount,
         reference: reference
       });
 
@@ -124,6 +134,11 @@ export const QuickPaymentSheet: React.FC<QuickPaymentSheetProps> = ({
             <div className="text-4xl sm:text-5xl font-black text-[#026cb6] tracking-tight">
               {currency}{grandTotal.toFixed(2)}
             </div>
+            {discountAmount > 0 && (
+              <div className="text-xs font-bold text-red-600 mt-1">
+                Discount applied: -{currency}{discountAmount.toFixed(2)}
+              </div>
+            )}
             <div className="text-[11px] text-slate-500 mt-1">
               Includes {currency}{taxAmount.toFixed(2)} tax ({taxRate}%)
             </div>

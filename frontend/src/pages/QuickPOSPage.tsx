@@ -525,6 +525,8 @@ export const QuickPOSPage: React.FC<QuickPOSPageProps> = ({
           customerName={customerName || `Table ${tableNumber}`}
           orderType={tableNumber.toLowerCase().includes('takeaway') ? 'TAKEAWAY' : 'DINE_IN'}
           tableNumber={tableNumber}
+          discountPercent={discountPercent}
+          discountFlat={discountFlat}
           onBack={() => setShowPaymentSheet(false)}
           onClose={() => setShowPaymentSheet(false)}
           onSuccess={(result) => {
