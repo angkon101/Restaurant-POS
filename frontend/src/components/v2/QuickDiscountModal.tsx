@@ -233,3 +233,4 @@ export const QuickDiscountModal: React.FC<QuickDiscountModalProps> = ({
     </div>
   );
 };
+

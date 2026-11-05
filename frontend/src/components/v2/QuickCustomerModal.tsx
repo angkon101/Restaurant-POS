@@ -146,3 +146,4 @@ export const QuickCustomerModal: React.FC<QuickCustomerModalProps> = ({
     </div>
   );
 };
+

@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { 
-  FileText, X, User, Percent, Trash2, Plus, Minus, AlertTriangle, CreditCard, ChevronRight
+  FileText, X, User, Percent, Trash2, Plus, Minus, AlertTriangle, CreditCard
 } from 'lucide-react';
 import { Category, MenuItem, Settings, Order, Payment } from '../types';
 import { QuickProductCard } from '../components/v2/QuickProductCard';
@@ -16,7 +16,7 @@ import { api } from '../services/api';
 import { haptics } from '../services/haptics';
 
 interface QuickPOSPageProps {
-  categories: Category[];
+  categories?: Category[];
   menuItems: MenuItem[];
   settings: Settings;
   isWsConnected?: boolean;
@@ -29,10 +29,7 @@ interface QuickPOSPageProps {
   setShowTableModal: (show: boolean) => void;
 }
 
-const COMMON_CHEF_NOTES = ['Less Spicy', 'Extra Spicy', 'No Onion', 'Extra Sauce', 'Pack Separate'];
-
 export const QuickPOSPage: React.FC<QuickPOSPageProps> = ({
-  categories,
   menuItems,
   settings,
   isMobileView = false,
@@ -46,7 +43,6 @@ export const QuickPOSPage: React.FC<QuickPOSPageProps> = ({
 
   // Order State
   const [cartItems, setCartItems] = useState<QuickCartItem[]>([]);
-  const [selectedCatId, setSelectedCatId] = useState<number | 'ALL' | 'SELECTED'>('ALL');
   const [waiterName] = useState('Staff 1');
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
@@ -74,19 +70,6 @@ export const QuickPOSPage: React.FC<QuickPOSPageProps> = ({
   const taxAmount = Math.round((subtotalAfterDiscount * (taxRate / 100)) * 100) / 100;
   const grandTotal = Math.round((subtotalAfterDiscount + taxAmount) * 100) / 100;
   const totalItemCount = cartItems.reduce((sum, it) => sum + it.quantity, 0);
-
-  // Filter products by category
-  const filteredItems = useMemo(() => {
-    return menuItems.filter(item => {
-      if (selectedCatId === 'SELECTED') {
-        return cartItems.some(it => it.menuItem.id === item.id);
-      }
-      if (selectedCatId !== 'ALL') {
-        return item.category_id === selectedCatId;
-      }
-      return true;
-    });
-  }, [menuItems, selectedCatId, cartItems]);
 
   // Cart actions
   const getItemQuantity = (itemId: number) => {
@@ -121,16 +104,6 @@ export const QuickPOSPage: React.FC<QuickPOSPageProps> = ({
   const handleRemoveItem = (itemId: number) => {
     haptics.tap();
     setCartItems(prev => prev.filter(it => it.menuItem.id !== itemId));
-  };
-
-  const handleUpdateItemNote = (itemId: number, note: string) => {
-    haptics.tap();
-    setCartItems(prev => prev.map(it => {
-      if (it.menuItem.id === itemId) {
-        return { ...it, notes: it.notes ? `${it.notes}, ${note}` : note };
-      }
-      return it;
-    }));
   };
 
   const handleDiscardPrompt = () => {
@@ -199,68 +172,11 @@ export const QuickPOSPage: React.FC<QuickPOSPageProps> = ({
       {/* ========================================================================= */}
       <div className="flex-1 flex flex-col h-full overflow-hidden bg-slate-50">
         
-        {/* Horizontal Category Pills Bar (No white container, scrollable blue pills) */}
-        <div className="px-3 pt-2.5 pb-1 flex items-center justify-between gap-2 shrink-0">
-          <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none py-0.5">
-            <button
-              type="button"
-              onClick={() => {
-                haptics.tap();
-                setSelectedCatId('SELECTED');
-              }}
-              className={`px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold whitespace-nowrap transition touch-manipulation active:scale-95 ${
-                selectedCatId === 'SELECTED'
-                  ? 'bg-[#084c94] text-white shadow-xs'
-                  : 'bg-[#026cb6] text-white/95 hover:bg-[#084c94]'
-              }`}
-            >
-              Selected ({totalItemCount})
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                haptics.tap();
-                setSelectedCatId('ALL');
-              }}
-              className={`px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold whitespace-nowrap transition touch-manipulation active:scale-95 ${
-                selectedCatId === 'ALL'
-                  ? 'bg-[#084c94] text-white shadow-xs'
-                  : 'bg-[#026cb6] text-white/95 hover:bg-[#084c94]'
-              }`}
-            >
-              All Items
-            </button>
-
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                type="button"
-                onClick={() => {
-                  haptics.tap();
-                  setSelectedCatId(cat.id);
-                }}
-                className={`px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold whitespace-nowrap transition touch-manipulation active:scale-95 ${
-                  selectedCatId === cat.id
-                    ? 'bg-[#084c94] text-white shadow-xs'
-                    : 'bg-[#026cb6] text-white/95 hover:bg-[#084c94]'
-                }`}
-              >
-                {cat.name}
-              </button>
-            ))}
-          </div>
-
-          <span className="text-[11px] font-bold text-slate-400 shrink-0 hidden sm:inline">
-            {filteredItems.length} items
-          </span>
-        </div>
-
         {/* Product Cards Grid: 3-column on mobile, 4-6 columns on desktop */}
         <div className="flex-1 p-2 sm:p-3 overflow-y-auto overscroll-contain">
-          {filteredItems.length === 0 ? (
+          {menuItems.length === 0 ? (
             <div className="py-20 text-center text-slate-400 text-xs sm:text-sm">
-              No products found in this category.
+              No products found in menu catalog.
             </div>
           ) : (
             <div className={`grid gap-2 sm:gap-3 ${
@@ -268,7 +184,7 @@ export const QuickPOSPage: React.FC<QuickPOSPageProps> = ({
                 ? 'grid-cols-3' 
                 : 'grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'
             }`}>
-              {filteredItems.map((item) => (
+              {menuItems.map((item) => (
                 <QuickProductCard
                   key={item.id}
                   item={item}
@@ -447,20 +363,9 @@ export const QuickPOSPage: React.FC<QuickPOSPageProps> = ({
                     </span>
                   </div>
 
-                  {/* Steppers & Quick Chef Notes */}
+                  {/* Steppers & Remove */}
                   <div className="flex items-center justify-between pt-1 border-t border-slate-200/60">
-                    <div className="flex items-center gap-1 overflow-x-auto scrollbar-none py-0.5">
-                      {COMMON_CHEF_NOTES.slice(0, 2).map((note) => (
-                        <button
-                          key={note}
-                          type="button"
-                          onClick={() => handleUpdateItemNote(it.menuItem.id, note)}
-                          className="px-1.5 py-0.5 bg-white border border-slate-200 rounded text-[9px] font-medium text-slate-600 hover:bg-slate-100 whitespace-nowrap active:scale-95"
-                        >
-                          +{note}
-                        </button>
-                      ))}
-                    </div>
+                    <span className="text-[10px] text-slate-400 font-medium">Qty:</span>
 
                     <div className="flex items-center gap-1.5 shrink-0 ml-1">
                       <button
@@ -597,7 +502,6 @@ export const QuickPOSPage: React.FC<QuickPOSPageProps> = ({
         onAddItem={handleAddItem}
         onDecrementItem={handleDecrementItem}
         onRemoveItem={handleRemoveItem}
-        onUpdateItemNote={handleUpdateItemNote}
         onOpenDiscount={() => {
           setShowBillSheet(false);
           setShowDiscountModal(true);

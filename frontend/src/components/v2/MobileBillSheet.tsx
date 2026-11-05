@@ -4,8 +4,6 @@ import { QuickCartItem } from './OrderConfirmSheet';
 import { MenuItem } from '../../types';
 import { haptics } from '../../services/haptics';
 
-const COMMON_CHEF_NOTES = ['Less Spicy', 'Extra Spicy', 'No Onion', 'Extra Sauce', 'Pack Separate'];
-
 interface MobileBillSheetProps {
   isOpen: boolean;
   cartItems: QuickCartItem[];
@@ -20,7 +18,6 @@ interface MobileBillSheetProps {
   onAddItem: (item: MenuItem) => void;
   onDecrementItem: (item: MenuItem) => void;
   onRemoveItem: (itemId: number) => void;
-  onUpdateItemNote: (itemId: number, note: string) => void;
   onOpenDiscount: () => void;
   onOpenCustomer: () => void;
   onOpenPayment: () => void;
@@ -42,7 +39,6 @@ export const MobileBillSheet: React.FC<MobileBillSheetProps> = ({
   onAddItem,
   onDecrementItem,
   onRemoveItem,
-  onUpdateItemNote,
   onOpenDiscount,
   onOpenCustomer,
   onOpenPayment,
@@ -124,20 +120,9 @@ export const MobileBillSheet: React.FC<MobileBillSheetProps> = ({
                   </span>
                 </div>
 
-                {/* Chef Notes & Stepper Row */}
+                {/* Steppers & Remove */}
                 <div className="flex items-center justify-between pt-1 border-t border-slate-200/70">
-                  <div className="flex items-center gap-1 overflow-x-auto scrollbar-none py-0.5">
-                    {COMMON_CHEF_NOTES.slice(0, 3).map((note) => (
-                      <button
-                        key={note}
-                        type="button"
-                        onClick={() => onUpdateItemNote(it.menuItem.id, note)}
-                        className="px-1.5 py-0.5 bg-white border border-slate-200 rounded text-[9px] font-semibold text-slate-600 hover:bg-slate-100 whitespace-nowrap active:scale-95"
-                      >
-                        +{note}
-                      </button>
-                    ))}
-                  </div>
+                  <span className="text-[10px] text-slate-400 font-medium">Quantity:</span>
 
                   <div className="flex items-center gap-1.5 shrink-0 ml-1">
                     <button
@@ -242,3 +227,4 @@ export const MobileBillSheet: React.FC<MobileBillSheetProps> = ({
     </div>
   );
 };
+
