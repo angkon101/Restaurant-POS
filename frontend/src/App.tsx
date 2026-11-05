@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Navbar } from './components/Navbar';
+import { Navbar, NavTab } from './components/Navbar';
+import { QuickPOSPage } from './pages/QuickPOSPage';
 import { POSPage } from './pages/POSPage';
 import { KitchenPage } from './pages/KitchenPage';
 import { ReportsPage } from './pages/ReportsPage';
@@ -9,7 +10,8 @@ import { api, WS_URL } from './services/api';
 import { sound } from './services/sound';
 
 export const App: React.FC = () => {
-  const [currentTab, setCurrentTab] = useState<'POS' | 'KITCHEN' | 'REPORTS' | 'SETTINGS'>('POS');
+  // Default to Version 2 Quick Order POS
+  const [currentTab, setCurrentTab] = useState<NavTab>('QUICK_POS');
   
   // Application Data States
   const [settings, setSettings] = useState<Settings>({
@@ -144,7 +146,18 @@ export const App: React.FC = () => {
 
       {/* Main View Area */}
       <main className="flex-1 flex overflow-hidden">
-        {currentTab === 'POS' && (
+        {/* Version 2: Quick Mobile-Friendly Order POS (Default) */}
+        {currentTab === 'QUICK_POS' && (
+          <QuickPOSPage
+            categories={categories}
+            menuItems={menuItems}
+            settings={settings}
+            onRefreshData={loadData}
+          />
+        )}
+
+        {/* Version 1: Modular Dine-In Floor & Table Map POS */}
+        {currentTab === 'FLOOR_POS' && (
           <POSPage
             tables={tables}
             categories={categories}
@@ -155,12 +168,14 @@ export const App: React.FC = () => {
           />
         )}
 
+        {/* Kitchen Display System */}
         {currentTab === 'KITCHEN' && (
           <KitchenPage
             paperSize={settings.printer_paper_size || '80mm'}
           />
         )}
 
+        {/* Sales & Z-Report */}
         {currentTab === 'REPORTS' && (
           <ReportsPage
             settings={settings}
@@ -168,6 +183,7 @@ export const App: React.FC = () => {
           />
         )}
 
+        {/* Admin Settings & Menu Catalog */}
         {currentTab === 'SETTINGS' && (
           <SettingsPage
             settings={settings}

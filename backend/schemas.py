@@ -166,6 +166,26 @@ class PaymentResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+# Quick Checkout Schema (Version 2)
+class QuickCheckoutRequest(BaseModel):
+    customer_name: str = "Walk-in Guest"
+    customer_phone: str = ""
+    order_type: str = "TAKEAWAY"
+    waiter_name: str = "Cashier"
+    notes: str = ""
+    items: List[OrderItemCreate]
+    payment_method: str = "CASH"
+    amount_tendered: float = 0.0
+    change_returned: float = 0.0
+    reference: str = ""
+    discount_percent: float = 0.0
+    discount_amount: float = 0.0
+
+class QuickCheckoutResponse(BaseModel):
+    order: OrderResponse
+    payment: PaymentResponse
+
+
 # Settings Schemas
 class SettingsBase(BaseModel):
     name: str = "Mini Bistro POS"

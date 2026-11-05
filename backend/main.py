@@ -511,6 +511,100 @@ async def process_payment(order_id: int, payment_in: schemas.PaymentCreate, db: 
     })
     return payment
 
+@app.post("/api/orders/quick-checkout", response_model=schemas.QuickCheckoutResponse)
+async def quick_checkout(checkout_in: schemas.QuickCheckoutRequest, db: Session = Depends(get_db)):
+    if not checkout_in.items:
+        raise HTTPException(status_code=400, detail="Cannot checkout with empty items")
+
+    settings = db.query(models.RestaurantSettings).first()
+    order_number = generate_order_number(db)
+    new_order = models.Order(
+        order_number=order_number,
+        table_id=None,
+        order_type=checkout_in.order_type,
+        status="COMPLETED",
+        completed_at=datetime.utcnow(),
+        customer_name=checkout_in.customer_name,
+        customer_phone=checkout_in.customer_phone,
+        waiter_name=checkout_in.waiter_name,
+        notes=checkout_in.notes,
+        discount_percent=checkout_in.discount_percent,
+        discount_amount=checkout_in.discount_amount
+    )
+    db.add(new_order)
+    db.flush()
+
+    # Process items
+    kot_items = []
+    for item_data in checkout_in.items:
+        menu_item = db.query(models.MenuItem).filter(models.MenuItem.id == item_data.menu_item_id).first()
+        if not menu_item:
+            continue
+        order_item = models.OrderItem(
+            order_id=new_order.id,
+            menu_item_id=menu_item.id,
+            item_name=menu_item.name,
+            unit_price=menu_item.price,
+            quantity=item_data.quantity,
+            total_price=round(menu_item.price * item_data.quantity, 2),
+            notes=item_data.notes,
+            status="READY",
+            kot_round=1
+        )
+        db.add(order_item)
+        kot_items.append(order_item)
+
+    db.flush()
+    recalculate_order_totals(new_order, settings)
+
+    # Generate Kitchen KOT ticket
+    if kot_items:
+        kot = models.KOT(
+            kot_number=generate_kot_number(db),
+            order_id=new_order.id,
+            table_id=None,
+            table_number=f"Counter #{new_order.order_number[-3:]}",
+            round_number=1,
+            waiter_name=checkout_in.waiter_name,
+            status="NEW"
+        )
+        db.add(kot)
+
+    # Process payment
+    amount_paid = new_order.total_amount
+    amount_tendered = checkout_in.amount_tendered if checkout_in.payment_method == "CASH" and checkout_in.amount_tendered >= amount_paid else amount_paid
+    change_due = round(amount_tendered - amount_paid, 2) if checkout_in.payment_method == "CASH" else 0.0
+
+    payment = models.Payment(
+        order_id=new_order.id,
+        amount=amount_paid,
+        payment_method=checkout_in.payment_method,
+        amount_tendered=amount_tendered,
+        change_returned=change_due,
+        reference=checkout_in.reference
+    )
+    db.add(payment)
+
+    db.commit()
+    db.refresh(new_order)
+    db.refresh(payment)
+
+    await manager.broadcast("ORDER_CREATED", {
+        "order_id": new_order.id,
+        "order_number": new_order.order_number,
+        "table_number": "Counter",
+        "total_amount": new_order.total_amount
+    })
+    await manager.broadcast("ORDER_PAID", {
+        "order_id": new_order.id,
+        "table_id": None,
+        "amount": payment.amount,
+        "payment_method": payment.payment_method
+    })
+
+    return {"order": new_order, "payment": payment}
+
+
 # ----------------- Analytics & Daily Reports (Z-Report) -----------------
 @app.get("/api/reports/today")
 def get_today_report(db: Session = Depends(get_db)):

@@ -201,6 +201,32 @@ export const api = {
     return res.json();
   },
 
+  async quickCheckout(data: {
+    customer_name?: string;
+    order_type?: string;
+    waiter_name?: string;
+    notes?: string;
+    items: Array<{ menu_item_id: number; quantity: number; notes: string }>;
+    payment_method: string;
+    amount_tendered?: number;
+    change_returned?: number;
+    discount_percent?: number;
+    discount_amount?: number;
+    reference?: string;
+  }): Promise<{ order: Order; payment: any }> {
+    const res = await fetch(`${API_BASE}/orders/quick-checkout`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || 'Failed to process quick checkout');
+    }
+    return res.json();
+  },
+
+
   // Reports
   async getTodayReport(): Promise<TodayReport> {
     const res = await fetch(`${API_BASE}/reports/today`);

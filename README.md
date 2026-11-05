@@ -16,9 +16,20 @@
 
 ## 🍽️ Overview
 
-**Mini Restaurant POS** is an ultra-fast, local-first Point of Sale system engineered specifically for mini restaurants, cafes, and bistros focusing on **Dine-In operations**, **multi-round Kitchen Order Tickets (KOT)**, **live Kitchen Display Systems (KDS)**, and **58mm / 80mm thermal receipt printing**.
+**Mini Restaurant POS** is an ultra-fast, local-first Point of Sale system with two specialized modes:
 
-Built on a zero-configuration SQLite architecture with full-duplex WebSockets, orders taken on waiter tablets or counter PCs sync across all screens in real time with zero external internet dependencies.
+- **📱 Version 2 (Default - Mobile-Friendly Quick POS)**: Streamlined, touch-first order flow designed for cashiers and mobile devices. Tap product cards to load orders instantly ➔ Tap bottom bar to review & confirm ➔ Settle with Cash (live change presets), Card, or QR ➔ Print receipt or start next order in 1 tap!
+- **🪑 Version 1 (Dine-In Full Table POS)**: Visual floor plan with real-time table statuses, multi-round KOTs, table transfers, and live elapsed dining timers.
+
+Built on a zero-configuration SQLite architecture with full-duplex WebSockets, orders sync across all screens in real time with zero external internet dependencies.
+
+---
+
+## 🏷️ Version History & Modular Branches
+
+- **`v1.0.0`** ([branch: `v1-full-dine-in`](https://github.com/angkon101/Restaurant-POS/tree/v1-full-dine-in)): Complete Dine-In table management, visual floor layout, multi-round kitchen orders, table transfers, and KDS.
+- **`v2.0.0`** (`main`): Mobile-friendly, high-velocity Quick Order POS with single-tap card ordering, bottom sheet confirmation, rapid cash checkout, and instant next-order cycling.
+
 
 ---
 
