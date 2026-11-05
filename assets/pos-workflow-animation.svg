@@ -1,0 +1,166 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 480" width="100%" height="100%">
+  <defs>
+    <!-- Background & gradients -->
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="100%">
+      <stop offset="0%" stop-color="#020617" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+
+    <linearGradient id="cardBg" x1="0" y1="0" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+
+    <style>
+      @keyframes travelPacket1 {
+        0% { cx: 200px; cy: 150px; opacity: 0; }
+        20% { opacity: 1; }
+        80% { opacity: 1; }
+        100% { cx: 480px; cy: 150px; opacity: 0; }
+      }
+
+      @keyframes travelPacket2 {
+        0% { cx: 480px; cy: 150px; opacity: 0; }
+        20% { opacity: 1; }
+        80% { opacity: 1; }
+        100% { cx: 760px; cy: 150px; opacity: 0; }
+      }
+
+      @keyframes travelPacket3 {
+        0% { cx: 760px; cy: 150px; opacity: 0; }
+        20% { opacity: 1; }
+        80% { opacity: 1; }
+        100% { cx: 480px; cy: 370px; opacity: 0; }
+      }
+
+      @keyframes pingRadar {
+        0% { r: 12px; opacity: 0.8; stroke-width: 2px; }
+        100% { r: 36px; opacity: 0; stroke-width: 0.5px; }
+      }
+
+      @keyframes glowPulse {
+        0%, 100% { filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.4)); }
+        50% { filter: drop-shadow(0 0 16px rgba(16, 185, 129, 0.9)); }
+      }
+
+      @keyframes amberGlow {
+        0%, 100% { filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.4)); }
+        50% { filter: drop-shadow(0 0 16px rgba(245, 158, 11, 0.9)); }
+      }
+
+      .packet-1 { animation: travelPacket1 2.4s infinite cubic-bezier(0.4, 0, 0.2, 1); }
+      .packet-2 { animation: travelPacket2 2.4s infinite cubic-bezier(0.4, 0, 0.2, 1) 0.8s; }
+      .packet-3 { animation: travelPacket3 2.4s infinite cubic-bezier(0.4, 0, 0.2, 1) 1.6s; }
+      .radar-ring { animation: pingRadar 2s cubic-bezier(0, 0.2, 0.8, 1) infinite; }
+      .green-glow { animation: glowPulse 3s ease-in-out infinite; }
+      .amber-glow { animation: amberGlow 3s ease-in-out infinite; }
+    </style>
+  </defs>
+
+  <rect width="960" height="480" rx="16" fill="url(#bg)" stroke="#1e293b" stroke-width="2" />
+
+  <!-- Section Header -->
+  <text x="480" y="44" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="20" fill="#f8fafc" letter-spacing="-0.5">
+    REAL-TIME DINE-IN RESTAURANT LIFECYCLE
+  </text>
+  <text x="480" y="66" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="500" font-size="12" fill="#64748b">
+    Full-duplex WebSocket architecture connecting Service Floor, Kitchen Display (KDS), and Counter Cashier
+  </text>
+
+  <!-- Connective Track Lines -->
+  <!-- Line 1 to 2 -->
+  <line x1="260" y1="150" x2="420" y2="150" stroke="#334155" stroke-width="3" stroke-dasharray="6 6" />
+  <!-- Line 2 to 3 -->
+  <line x1="540" y1="150" x2="700" y2="150" stroke="#334155" stroke-width="3" stroke-dasharray="6 6" />
+  <!-- Line 3 to 4 (diagonal down) -->
+  <path d="M 760 220 L 760 300 Q 760 370 600 370" fill="none" stroke="#334155" stroke-width="3" stroke-dasharray="6 6" />
+  <!-- Line 4 to 1 (loop back) -->
+  <path d="M 360 370 Q 200 370 200 300 L 200 220" fill="none" stroke="#334155" stroke-width="3" stroke-dasharray="6 6" />
+
+  <!-- Animated Flying Data Packets -->
+  <circle class="packet-1" cx="200" cy="150" r="6" fill="#10b981" />
+  <circle class="packet-2" cx="480" cy="150" r="6" fill="#f59e0b" />
+  <circle class="packet-3" cx="760" cy="150" r="6" fill="#818cf8" />
+
+  <!-- ================= STAGE 1: FLOOR MAP & ORDER ================= -->
+  <g transform="translate(100, 90)">
+    <rect width="180" height="120" rx="14" fill="url(#cardBg)" stroke="#10b981" stroke-width="1.6" class="green-glow" />
+    <circle cx="90" cy="38" r="18" fill="#10b981" fill-opacity="0.2" />
+    <!-- Radar ring -->
+    <circle class="radar-ring" cx="90" cy="38" fill="none" stroke="#10b981" />
+    <text x="90" y="43" text-anchor="middle" font-family="sans-serif" font-size="16">🪑</text>
+    <text x="90" y="76" text-anchor="middle" font-family="sans-serif" font-weight="800" font-size="13" fill="#ffffff">
+      1. Floor &amp; Table
+    </text>
+    <text x="90" y="94" text-anchor="middle" font-family="sans-serif" font-weight="500" font-size="10.5" fill="#94a3b8">
+      Select Table T-01
+    </text>
+    <text x="90" y="108" text-anchor="middle" font-family="sans-serif" font-weight="600" font-size="9.5" fill="#34d399">
+      Add Round 1 Items
+    </text>
+  </g>
+
+  <!-- ================= STAGE 2: KOT ENGINE & WEBSOCKET ================= -->
+  <g transform="translate(390, 90)">
+    <rect width="180" height="120" rx="14" fill="url(#cardBg)" stroke="#38bdf8" stroke-width="1.6" />
+    <circle cx="90" cy="38" r="18" fill="#38bdf8" fill-opacity="0.2" />
+    <text x="90" y="43" text-anchor="middle" font-family="sans-serif" font-size="16">⚡</text>
+    <text x="90" y="76" text-anchor="middle" font-family="sans-serif" font-weight="800" font-size="13" fill="#ffffff">
+      2. FastAPI Hub
+    </text>
+    <text x="90" y="94" text-anchor="middle" font-family="sans-serif" font-weight="500" font-size="10.5" fill="#94a3b8">
+      WebSocket Broadcast
+    </text>
+    <text x="90" y="108" text-anchor="middle" font-family="sans-serif" font-weight="600" font-size="9.5" fill="#38bdf8">
+      Zero Latency Sync
+    </text>
+  </g>
+
+  <!-- ================= STAGE 3: KITCHEN DISPLAY (KDS) ================= -->
+  <g transform="translate(680, 90)">
+    <rect width="180" height="120" rx="14" fill="url(#cardBg)" stroke="#f59e0b" stroke-width="1.6" class="amber-glow" />
+    <circle cx="90" cy="38" r="18" fill="#f59e0b" fill-opacity="0.2" />
+    <text x="90" y="43" text-anchor="middle" font-family="sans-serif" font-size="16">🍳</text>
+    <text x="90" y="76" text-anchor="middle" font-family="sans-serif" font-weight="800" font-size="13" fill="#ffffff">
+      3. Kitchen KDS
+    </text>
+    <text x="90" y="94" text-anchor="middle" font-family="sans-serif" font-weight="500" font-size="10.5" fill="#94a3b8">
+      KOT Chime • Cooking
+    </text>
+    <text x="90" y="108" text-anchor="middle" font-family="sans-serif" font-weight="600" font-size="9.5" fill="#fbbf24">
+      Ready To Serve
+    </text>
+  </g>
+
+  <!-- ================= STAGE 4: CHECKOUT & THERMAL RECEIPT ================= -->
+  <g transform="translate(480, 310)">
+    <rect width="220" height="120" rx="14" fill="url(#cardBg)" stroke="#818cf8" stroke-width="1.6" />
+    <circle cx="110" cy="38" r="18" fill="#818cf8" fill-opacity="0.2" />
+    <text x="110" y="43" text-anchor="middle" font-family="sans-serif" font-size="16">🧾</text>
+    <text x="110" y="76" text-anchor="middle" font-family="sans-serif" font-weight="800" font-size="13" fill="#ffffff">
+      4. Settle Bill &amp; Print
+    </text>
+    <text x="110" y="94" text-anchor="middle" font-family="sans-serif" font-weight="500" font-size="10.5" fill="#94a3b8">
+      Cash / Card / Split / QR
+    </text>
+    <text x="110" y="108" text-anchor="middle" font-family="sans-serif" font-weight="600" font-size="9.5" fill="#a5b4fc">
+      58mm / 80mm ESC/POS
+    </text>
+  </g>
+
+  <!-- ================= STAGE 5: Z-REPORT & RECONCILIATION ================= -->
+  <g transform="translate(260, 310)">
+    <rect width="200" height="120" rx="14" fill="url(#cardBg)" stroke="#10b981" stroke-width="1.6" />
+    <circle cx="100" cy="38" r="18" fill="#10b981" fill-opacity="0.2" />
+    <text x="100" y="43" text-anchor="middle" font-family="sans-serif" font-size="16">📊</text>
+    <text x="100" y="76" text-anchor="middle" font-family="sans-serif" font-weight="800" font-size="13" fill="#ffffff">
+      5. Z-Report &amp; Analytics
+    </text>
+    <text x="100" y="94" text-anchor="middle" font-family="sans-serif" font-weight="500" font-size="10.5" fill="#94a3b8">
+      End-of-Day Shift Close
+    </text>
+    <text x="100" y="108" text-anchor="middle" font-family="sans-serif" font-weight="600" font-size="9.5" fill="#34d399">
+      Cash Drawer Balance
+    </text>
+  </g>
+</svg>
