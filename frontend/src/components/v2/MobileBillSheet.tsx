@@ -12,8 +12,6 @@ interface MobileBillSheetProps {
   customerName: string;
   rawSubtotal: number;
   discountAmount: number;
-  taxRate: number;
-  taxAmount: number;
   grandTotal: number;
   onAddItem: (item: MenuItem) => void;
   onDecrementItem: (item: MenuItem) => void;
@@ -33,8 +31,6 @@ export const MobileBillSheet: React.FC<MobileBillSheetProps> = ({
   customerName,
   rawSubtotal,
   discountAmount,
-  taxRate,
-  taxAmount,
   grandTotal,
   onAddItem,
   onDecrementItem,
@@ -184,11 +180,6 @@ export const MobileBillSheet: React.FC<MobileBillSheetProps> = ({
             <span className={discountAmount > 0 ? 'font-bold text-red-600' : 'text-slate-400'}>
               {discountAmount > 0 ? `-${currencySymbol}${discountAmount.toFixed(2)}` : `${currencySymbol}0.00`}
             </span>
-          </div>
-
-          <div className="flex justify-between text-slate-600">
-            <span>Tax ({taxRate}%):</span>
-            <span className="font-semibold text-slate-800">{currencySymbol}{taxAmount.toFixed(2)}</span>
           </div>
 
           <div className="flex justify-between text-sm font-extrabold text-slate-900 pt-1.5 border-t border-slate-200">

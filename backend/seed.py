@@ -14,7 +14,7 @@ def seed_database():
             address="42 Food Boulevard, City Center",
             phone="+91 98765 43210",
             currency_symbol="₹",
-            tax_percentage=5.0,
+            tax_percentage=0.0,
             service_charge_percentage=0.0,
             receipt_header="Welcome to Mijan's Restaurant!",
             receipt_footer="Thank you for your visit! Please come again.",

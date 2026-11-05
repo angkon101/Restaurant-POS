@@ -141,10 +141,6 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
                 <span className="font-bold text-slate-800">Bangladeshi Taka ({settings?.currency_symbol || '৳'})</span>
               </div>
               <div className="flex justify-between text-slate-500 text-[11px]">
-                <span>VAT / Tax:</span>
-                <span className="font-bold text-slate-800">{settings?.tax_percentage || 5.0}%</span>
-              </div>
-              <div className="flex justify-between text-slate-500 text-[11px]">
                 <span>Printer Paper:</span>
                 <span className="font-bold text-slate-800">{settings?.printer_paper_size || '80mm'}</span>
               </div>

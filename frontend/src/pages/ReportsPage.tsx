@@ -96,7 +96,7 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ settings, paperSize, o
                 </div>
               </div>
               <h3 className="text-2xl font-black text-slate-900">{currency}{report.total_sales.toFixed(2)}</h3>
-              <p className="text-[11px] text-slate-400 mt-1">Tax collected: {currency}{report.total_tax.toFixed(2)}</p>
+              <p className="text-[11px] text-slate-400 mt-1">Net Sales for Today</p>
             </div>
 
             <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
@@ -219,10 +219,6 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ settings, paperSize, o
                 <div className="flex justify-between font-bold">
                   <span>Total Sales:</span>
                   <span>{currency}{report.total_sales.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Total Tax:</span>
-                  <span>{currency}{report.total_tax.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Total Discounts:</span>

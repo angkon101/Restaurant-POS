@@ -46,9 +46,7 @@ export const OrderConfirmSheet: React.FC<OrderConfirmSheetProps> = ({
   const [noteInput, setNoteInput] = useState('');
 
   const subtotal = items.reduce((sum, it) => sum + (it.menuItem.price * it.quantity), 0);
-  const taxRate = settings?.tax_percentage || 5.0;
-  const taxAmount = (subtotal * (taxRate / 100));
-  const grandTotal = subtotal + taxAmount;
+  const grandTotal = subtotal;
 
   const handleOpenNote = (item: QuickCartItem) => {
     setEditingNoteId(item.menuItem.id);
@@ -231,18 +229,10 @@ export const OrderConfirmSheet: React.FC<OrderConfirmSheetProps> = ({
           </div>
 
           {/* Cost Summary Box */}
-          <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-1.5 text-xs">
-            <div className="flex justify-between text-slate-500">
-              <span>Subtotal</span>
-              <span className="text-slate-800 font-medium">{currency}{subtotal.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between text-slate-500">
-              <span>Tax ({taxRate}%)</span>
-              <span className="text-slate-800 font-medium">{currency}{taxAmount.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between text-base font-bold text-slate-900 pt-2 border-t border-slate-200">
-              <span>Grand Total</span>
-              <span className="text-[#026cb6] text-lg">{currency}{grandTotal.toFixed(2)}</span>
+          <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 text-xs">
+            <div className="flex justify-between text-base font-bold text-slate-900">
+              <span>Total Payable</span>
+              <span className="text-[#026cb6] text-lg font-black">{currency}{grandTotal.toFixed(2)}</span>
             </div>
           </div>
         </div>

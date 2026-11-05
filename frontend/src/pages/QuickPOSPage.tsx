@@ -60,15 +60,12 @@ export const QuickPOSPage: React.FC<QuickPOSPageProps> = ({
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
   const [successResult, setSuccessResult] = useState<{ order: Order; payment: Payment } | null>(null);
 
-  // Calculations
+  // Calculations (Tax removed completely)
   const rawSubtotal = cartItems.reduce((sum, it) => sum + (it.menuItem.price * it.quantity), 0);
   const discountAmount = discountPercent > 0 
     ? Math.round(rawSubtotal * (discountPercent / 100))
     : Math.min(rawSubtotal, discountFlat);
-  const subtotalAfterDiscount = Math.max(0, rawSubtotal - discountAmount);
-  const taxRate = settings?.tax_percentage || 5.0;
-  const taxAmount = Math.round((subtotalAfterDiscount * (taxRate / 100)) * 100) / 100;
-  const grandTotal = Math.round((subtotalAfterDiscount + taxAmount) * 100) / 100;
+  const grandTotal = Math.max(0, rawSubtotal - discountAmount);
   const totalItemCount = cartItems.reduce((sum, it) => sum + it.quantity, 0);
 
   // Cart actions
@@ -142,8 +139,8 @@ export const QuickPOSPage: React.FC<QuickPOSPageProps> = ({
     subtotal: rawSubtotal,
     discount_percent: discountPercent,
     discount_amount: discountAmount,
-    tax_percent: taxRate,
-    tax_amount: taxAmount,
+    tax_percent: 0,
+    tax_amount: 0,
     service_charge: 0,
     total_amount: grandTotal,
     customer_name: customerName,
@@ -433,23 +430,21 @@ export const QuickPOSPage: React.FC<QuickPOSPageProps> = ({
             </div>
           )}
 
-          {/* Cost Summary Box */}
+          {/* Cost Summary Box (Tax removed) */}
           <div className="p-3 bg-slate-50 border-t border-slate-200 space-y-1 text-xs shrink-0">
-            <div className="flex justify-between text-slate-500 text-[11px]">
-              <span>Subtotal:</span>
-              <span className="font-semibold text-slate-700">{currency}{rawSubtotal.toFixed(2)}</span>
-            </div>
-            {discountAmount > 0 && (
-              <div className="flex justify-between text-red-600 font-semibold text-[11px]">
-                <span>Discount:</span>
-                <span>-{currency}{discountAmount.toFixed(2)}</span>
-              </div>
-            )}
-            <div className="flex justify-between text-slate-500 text-[11px]">
-              <span>Tax ({taxRate}%):</span>
-              <span className="font-semibold text-slate-700">{currency}{taxAmount.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between text-sm font-extrabold text-slate-900 pt-1 border-t border-slate-200">
+            {discountAmount > 0 ? (
+              <>
+                <div className="flex justify-between text-slate-500 text-[11px]">
+                  <span>Subtotal:</span>
+                  <span className="font-semibold text-slate-700">{currency}{rawSubtotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-red-600 font-semibold text-[11px]">
+                  <span>Discount:</span>
+                  <span>-{currency}{discountAmount.toFixed(2)}</span>
+                </div>
+              </>
+            ) : null}
+            <div className={`flex justify-between text-sm font-extrabold text-slate-900 ${discountAmount > 0 ? 'pt-1 border-t border-slate-200' : ''}`}>
               <span>Total:</span>
               <span className="text-[#026cb6] text-base">{currency}{grandTotal.toFixed(2)}</span>
             </div>
@@ -494,8 +489,6 @@ export const QuickPOSPage: React.FC<QuickPOSPageProps> = ({
         customerName={customerName}
         rawSubtotal={rawSubtotal}
         discountAmount={discountAmount}
-        taxRate={taxRate}
-        taxAmount={taxAmount}
         grandTotal={grandTotal}
         onAddItem={handleAddItem}
         onDecrementItem={handleDecrementItem}

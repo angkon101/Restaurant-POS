@@ -40,7 +40,7 @@ export const App: React.FC = () => {
     address: 'Dhanmondi, Dhaka, Bangladesh',
     phone: '+880 1712-345678',
     currency_symbol: '৳',
-    tax_percentage: 5.0,
+    tax_percentage: 0.0,
     service_charge_percentage: 0.0,
     receipt_header: "Welcome to Mijan's Restaurant!",
     receipt_footer: 'Thank you for dining with us! Please come again.',

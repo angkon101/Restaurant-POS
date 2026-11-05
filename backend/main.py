@@ -87,13 +87,12 @@ def recalculate_order_totals(order: models.Order, settings: models.RestaurantSet
     
     after_discount = max(0.0, order.subtotal - order.discount_amount)
     
-    # Calculate Tax
-    tax_percent = settings.tax_percentage if settings else 5.0
-    order.tax_percent = tax_percent
-    order.tax_amount = round(after_discount * (tax_percent / 100.0), 2)
+    # Tax removed (0%)
+    order.tax_percent = 0.0
+    order.tax_amount = 0.0
     
     # Total
-    order.total_amount = round(after_discount + order.tax_amount + order.service_charge, 2)
+    order.total_amount = round(after_discount + order.service_charge, 2)
 
 # ----------------- Settings Endpoints -----------------
 @app.get("/api/settings", response_model=schemas.SettingsResponse)

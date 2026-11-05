@@ -36,10 +36,7 @@ export const QuickPaymentSheet: React.FC<QuickPaymentSheetProps> = ({
   const discountAmount = discountPercent > 0 
     ? Math.round(rawSubtotal * (discountPercent / 100))
     : Math.min(rawSubtotal, discountFlat);
-  const subtotalAfterDiscount = Math.max(0, rawSubtotal - discountAmount);
-  const taxRate = settings?.tax_percentage || 5.0;
-  const taxAmount = Math.round((subtotalAfterDiscount * (taxRate / 100)) * 100) / 100;
-  const grandTotal = Math.round((subtotalAfterDiscount + taxAmount) * 100) / 100;
+  const grandTotal = Math.max(0, rawSubtotal - discountAmount);
 
   const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'CARD' | 'MOBILE'>('CASH');
   const [tenderedStr, setTenderedStr] = useState<string>(grandTotal.toFixed(2));
@@ -139,9 +136,6 @@ export const QuickPaymentSheet: React.FC<QuickPaymentSheetProps> = ({
                 Discount applied: -{currency}{discountAmount.toFixed(2)}
               </div>
             )}
-            <div className="text-[11px] text-slate-500 mt-1">
-              Includes {currency}{taxAmount.toFixed(2)} tax ({taxRate}%)
-            </div>
           </div>
 
           {/* Payment Method Selector */}
