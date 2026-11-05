@@ -1,6 +1,7 @@
 import React from 'react';
 import { Minus, Plus } from 'lucide-react';
 import { MenuItem } from '../../types';
+import { haptics } from '../../services/haptics';
 
 interface QuickProductCardProps {
   item: MenuItem;
@@ -19,10 +20,29 @@ export const QuickProductCard: React.FC<QuickProductCardProps> = ({
 }) => {
   const firstLetter = item.name.trim().charAt(0).toUpperCase();
 
+  const handleAddClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    haptics.tap();
+    onAdd(item);
+  };
+
+  const handleDecrementClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    haptics.tap();
+    onDecrement(item);
+  };
+
+  const handleCardTap = () => {
+    haptics.tap();
+    onAdd(item);
+  };
+
   return (
     <div
-      onClick={() => onAdd(item)}
-      className="bg-white rounded-xl shadow-sm border border-slate-200/80 hover:border-blue-400 overflow-hidden flex flex-col justify-between transition-all active:scale-[0.98] select-none cursor-pointer"
+      onClick={handleCardTap}
+      className={`bg-white rounded-xl shadow-xs border transition-all active:scale-[0.97] select-none cursor-pointer flex flex-col justify-between overflow-hidden touch-manipulation ${
+        quantity > 0 ? 'border-[#026cb6]/60 ring-1 ring-[#026cb6]/20' : 'border-slate-200/90 hover:border-slate-300'
+      }`}
     >
       {/* Product Image / Placeholder Letter Header with Floating Price Tag */}
       <div className="relative w-full h-24 sm:h-28 bg-slate-50 flex items-center justify-center overflow-hidden">
@@ -45,7 +65,7 @@ export const QuickProductCard: React.FC<QuickProductCardProps> = ({
         </span>
 
         {/* Price Badge in Top-Right Corner */}
-        <div className="absolute top-1.5 right-1.5 bg-black/85 text-white text-[11px] font-bold px-2 py-0.5 rounded-full shadow-sm z-10 flex items-center gap-0.5">
+        <div className="absolute top-1.5 right-1.5 bg-black/85 text-white text-[11px] font-bold px-2 py-0.5 rounded-full shadow-xs z-10 flex items-center gap-0.5">
           <span>{currencySymbol}</span>
           <span>{item.price.toFixed(0)}</span>
         </div>
@@ -60,31 +80,31 @@ export const QuickProductCard: React.FC<QuickProductCardProps> = ({
 
       {/* Bottom: Stepper Row with Red (-) and Green (+) */}
       <div
-        className="px-2 pb-2.5 pt-1 flex items-center justify-center gap-2.5"
+        className="px-2 pb-2.5 pt-1 flex items-center justify-center gap-2"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           type="button"
-          onClick={() => onDecrement(item)}
+          onClick={handleDecrementClick}
           disabled={quantity <= 0}
-          className={`w-6 h-6 rounded-full flex items-center justify-center text-white font-bold transition shadow-sm active:scale-90 ${
+          className={`w-7 h-7 rounded-full flex items-center justify-center text-white font-bold transition shadow-xs active:scale-90 touch-manipulation ${
             quantity > 0
               ? 'bg-red-500 hover:bg-red-600 active:bg-red-700'
-              : 'bg-red-200 text-red-100 cursor-not-allowed opacity-50'
+              : 'bg-red-200 text-red-100 cursor-not-allowed opacity-40'
           }`}
           title="Decrease"
         >
           <Minus className="w-3.5 h-3.5 stroke-[3]" />
         </button>
 
-        <span className="font-bold text-xs sm:text-sm text-slate-800 w-4 text-center">
+        <span className="font-extrabold text-xs sm:text-sm text-slate-800 w-5 text-center">
           {quantity}
         </span>
 
         <button
           type="button"
-          onClick={() => onAdd(item)}
-          className="w-6 h-6 rounded-full bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 active:scale-90 text-white flex items-center justify-center font-bold transition shadow-sm"
+          onClick={handleAddClick}
+          className="w-7 h-7 rounded-full bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 active:scale-90 text-white flex items-center justify-center font-bold transition shadow-xs touch-manipulation"
           title="Increase"
         >
           <Plus className="w-3.5 h-3.5 stroke-[3]" />

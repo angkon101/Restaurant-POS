@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Navbar, NavTab } from './components/Navbar';
+import { MobileNavDrawer } from './components/v2/MobileNavDrawer';
 import { QuickPOSPage } from './pages/QuickPOSPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { SettingsPage } from './pages/SettingsPage';
@@ -10,6 +11,7 @@ import { Agentation } from 'agentation';
 
 export const App: React.FC = () => {
   const [currentTab, setCurrentTab] = useState<NavTab>('POS');
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   
   // Application Data States
   const [settings, setSettings] = useState<Settings>({
@@ -105,7 +107,7 @@ export const App: React.FC = () => {
   }, [loadData]);
 
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden bg-slate-100 text-slate-800 font-sans">
+    <div className="flex flex-col h-[100dvh] w-screen overflow-hidden bg-slate-100 text-slate-800 font-sans">
       {/* Backend Disconnected Notice */}
       {backendError && (
         <div className="bg-red-900/90 text-white text-xs px-4 py-2 text-center font-bold flex items-center justify-center gap-2 no-print border-b border-red-700">
@@ -119,23 +121,27 @@ export const App: React.FC = () => {
         </div>
       )}
 
-      {/* Navigation Header */}
-      <Navbar
-        currentTab={currentTab}
-        onSelectTab={setCurrentTab}
-        settings={settings}
-        isWsConnected={isWsConnected}
-      />
+      {/* Navigation Header (Visible on desktop or when navigating Reports/Settings on mobile) */}
+      <div className={currentTab === 'POS' ? 'hidden md:block' : 'block'}>
+        <Navbar
+          currentTab={currentTab}
+          onSelectTab={setCurrentTab}
+          settings={settings}
+          isWsConnected={isWsConnected}
+        />
+      </div>
 
       {/* Main View Area */}
       <main className="flex-1 flex overflow-hidden">
-        {/* Simple Order-Based POS */}
+        {/* Simple Mobile-First Order POS */}
         {currentTab === 'POS' && (
           <QuickPOSPage
             categories={categories}
             menuItems={menuItems}
             settings={settings}
+            isWsConnected={isWsConnected}
             onRefreshData={loadData}
+            onOpenDrawer={() => setIsDrawerOpen(true)}
           />
         )}
 
@@ -157,6 +163,19 @@ export const App: React.FC = () => {
           />
         )}
       </main>
+
+      {/* Mobile Slide-Out Navigation Drawer */}
+      <MobileNavDrawer
+        isOpen={isDrawerOpen}
+        currentTab={currentTab}
+        settings={settings}
+        isWsConnected={isWsConnected}
+        onSelectTab={(tab) => {
+          setCurrentTab(tab);
+          setIsDrawerOpen(false);
+        }}
+        onClose={() => setIsDrawerOpen(false)}
+      />
 
       {/* Agentation Visual Feedback Tool for Pair-Programming */}
       <Agentation endpoint="http://localhost:4747" appName="Mini Restaurant POS" />
