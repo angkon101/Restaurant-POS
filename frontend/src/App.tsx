@@ -1,18 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Navbar, NavTab } from './components/Navbar';
 import { QuickPOSPage } from './pages/QuickPOSPage';
-import { POSPage } from './pages/POSPage';
-import { KitchenPage } from './pages/KitchenPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { SettingsPage } from './pages/SettingsPage';
-import { Table, Category, MenuItem, Order, KOT, Settings } from './types';
+import { Category, MenuItem, Settings } from './types';
 import { api, WS_URL } from './services/api';
 import { sound } from './services/sound';
 import { Agentation } from 'agentation';
 
 export const App: React.FC = () => {
-  // Default to Version 2 Quick Order POS
-  const [currentTab, setCurrentTab] = useState<NavTab>('QUICK_POS');
+  const [currentTab, setCurrentTab] = useState<NavTab>('POS');
   
   // Application Data States
   const [settings, setSettings] = useState<Settings>({
@@ -28,34 +25,25 @@ export const App: React.FC = () => {
     receipt_footer: 'Thank you for dining with us! Have a wonderful day.',
     printer_paper_size: '80mm'
   });
-  const [tables, setTables] = useState<Table[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
-  const [activeOrders, setActiveOrders] = useState<Order[]>([]);
-  const [activeKots, setActiveKots] = useState<KOT[]>([]);
   
   // Realtime WebSocket State
   const [isWsConnected, setIsWsConnected] = useState(false);
   const [backendError, setBackendError] = useState<string | null>(null);
 
-  // Load all initial data from backend
+  // Load initial data from backend
   const loadData = useCallback(async () => {
     try {
       setBackendError(null);
-      const [s, t, c, m, o, k] = await Promise.all([
+      const [s, c, m] = await Promise.all([
         api.getSettings(),
-        api.getTables(),
         api.getCategories(),
-        api.getMenuItems(),
-        api.getActiveOrders(),
-        api.getKOTs(true)
+        api.getMenuItems()
       ]);
       setSettings(s);
-      setTables(t);
       setCategories(c);
       setMenuItems(m);
-      setActiveOrders(o);
-      setActiveKots(k);
     } catch (err) {
       console.error('Failed to load initial data:', err);
       setBackendError('Cannot connect to POS backend server. Please verify FastAPI is running on port 8000.');
@@ -66,7 +54,7 @@ export const App: React.FC = () => {
     loadData();
   }, [loadData]);
 
-  // WebSocket real-time event listener with reconnect
+  // WebSocket real-time event listener
   useEffect(() => {
     let ws: WebSocket | null = null;
     let reconnectTimeout: any = null;
@@ -85,14 +73,9 @@ export const App: React.FC = () => {
             const message = JSON.parse(event.data);
             const { type } = message;
 
-            // Trigger sound effects and data refresh
-            if (type === 'KOT_CREATED') {
-              sound.playKitchenBell();
-              loadData();
-            } else if (type === 'ORDER_PAID') {
+            if (type === 'ORDER_PAID') {
               sound.playCashRegister();
-              loadData();
-            } else if (type === 'ORDER_CREATED' || type === 'ORDER_UPDATED' || type === 'TABLE_TRANSFERRED' || type === 'KOT_STATUS_CHANGED') {
+            } else if (type === 'MENU_UPDATED' || type === 'SETTINGS_UPDATED') {
               loadData();
             }
           } catch {
@@ -141,14 +124,13 @@ export const App: React.FC = () => {
         currentTab={currentTab}
         onSelectTab={setCurrentTab}
         settings={settings}
-        kotCount={activeKots.length}
         isWsConnected={isWsConnected}
       />
 
       {/* Main View Area */}
       <main className="flex-1 flex overflow-hidden">
-        {/* Version 2: Quick Mobile-Friendly Order POS (Default) */}
-        {currentTab === 'QUICK_POS' && (
+        {/* Simple Order-Based POS */}
+        {currentTab === 'POS' && (
           <QuickPOSPage
             categories={categories}
             menuItems={menuItems}
@@ -157,26 +139,7 @@ export const App: React.FC = () => {
           />
         )}
 
-        {/* Version 1: Modular Dine-In Floor & Table Map POS */}
-        {currentTab === 'FLOOR_POS' && (
-          <POSPage
-            tables={tables}
-            categories={categories}
-            menuItems={menuItems}
-            activeOrders={activeOrders}
-            settings={settings}
-            onRefreshData={loadData}
-          />
-        )}
-
-        {/* Kitchen Display System */}
-        {currentTab === 'KITCHEN' && (
-          <KitchenPage
-            paperSize={settings.printer_paper_size || '80mm'}
-          />
-        )}
-
-        {/* Sales & Z-Report */}
+        {/* Daily Sales & Z-Report */}
         {currentTab === 'REPORTS' && (
           <ReportsPage
             settings={settings}
@@ -188,7 +151,6 @@ export const App: React.FC = () => {
         {currentTab === 'SETTINGS' && (
           <SettingsPage
             settings={settings}
-            tables={tables}
             categories={categories}
             menuItems={menuItems}
             onRefreshData={loadData}
@@ -197,7 +159,7 @@ export const App: React.FC = () => {
         )}
       </main>
 
-      {/* Visual Agentation Feedback Tool for AI Editing */}
+      {/* Agentation Visual Feedback Tool for Pair-Programming */}
       <Agentation endpoint="http://localhost:4747" appName="Mini Restaurant POS" />
     </div>
   );

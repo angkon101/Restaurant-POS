@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { Save, Plus, Trash2, CheckCircle2, Store, Utensils, LayoutGrid } from 'lucide-react';
-import { Settings, Table, Category, MenuItem } from '../types';
+import { Save, Plus, Trash2, CheckCircle2, Store, Utensils } from 'lucide-react';
+import { Settings, Category, MenuItem } from '../types';
 import { api } from '../services/api';
 
 interface SettingsPageProps {
   settings: Settings;
-  tables: Table[];
   categories: Category[];
   menuItems: MenuItem[];
   onRefreshData: () => void;
@@ -14,19 +13,16 @@ interface SettingsPageProps {
 
 export const SettingsPage: React.FC<SettingsPageProps> = ({
   settings,
-  tables,
   categories,
   menuItems,
   onRefreshData,
   onUpdateSettings
 }) => {
-  const [activeTab, setActiveTab] = useState<'GENERAL' | 'TABLES' | 'MENU'>('GENERAL');
+  const [activeTab, setActiveTab] = useState<'GENERAL' | 'MENU'>('GENERAL');
   const [formData, setFormData] = useState<Settings>(settings);
   const [isSaving, setIsSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
 
-  // Table form state
-  const [newTable, setNewTable] = useState({ number: '', name: '', capacity: 4, section: 'Main Hall' });
   // Menu item form state
   const [newMenuItem, setNewMenuItem] = useState({
     name: '',
@@ -49,18 +45,6 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
     } catch (err) {
       setIsSaving(false);
       alert((err as Error).message || 'Failed to update settings');
-    }
-  };
-
-  const handleAddTable = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newTable.number.trim() || !newTable.name.trim()) return;
-    try {
-      await api.createTable(newTable);
-      setNewTable({ number: '', name: '', capacity: 4, section: 'Main Hall' });
-      onRefreshData();
-    } catch (err) {
-      alert((err as Error).message || 'Failed to add table');
     }
   };
 
@@ -104,13 +88,12 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-slate-950 text-slate-100 overflow-y-auto p-6 space-y-6">
-      {/* Settings Navigation Tabs */}
+    <div className="flex-1 flex flex-col h-full bg-slate-950 text-slate-100 overflow-y-auto p-4 sm:p-6 space-y-6">
+      {/* Navigation Tabs */}
       <div className="flex items-center gap-2 border-b border-slate-800 pb-4">
         {[
           { id: 'GENERAL', label: 'Restaurant & Receipt', icon: Store },
-          { id: 'TABLES', label: 'Tables & Sections', icon: LayoutGrid },
-          { id: 'MENU', label: 'Menu Catalog', icon: Utensils },
+          { id: 'MENU', label: 'Menu Catalog Admin', icon: Utensils },
         ].map(({ id, label, icon: Icon }) => (
           <button
             key={id}
@@ -137,7 +120,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
 
       {/* 1. GENERAL & THERMAL PRINTER SETTINGS */}
       {activeTab === 'GENERAL' && (
-        <form onSubmit={handleSaveGeneral} className="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-5 max-w-2xl">
+        <form onSubmit={handleSaveGeneral} className="bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-800 space-y-5 max-w-2xl">
           <h3 className="font-bold text-base text-white border-b border-slate-800 pb-2">Restaurant Profile</h3>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -182,7 +165,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             </div>
           </div>
 
-          <h3 className="font-bold text-base text-white border-b border-slate-800 pb-2 pt-2">Billing & Thermal Printer</h3>
+          <h3 className="font-bold text-base text-white border-b border-slate-800 pb-2 pt-2">Billing &amp; Thermal Printer</h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
@@ -240,75 +223,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
         </form>
       )}
 
-      {/* 2. TABLE CONFIGURATION */}
-      {activeTab === 'TABLES' && (
-        <div className="space-y-6 max-w-4xl">
-          {/* Add Table Card */}
-          <form onSubmit={handleAddTable} className="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-4">
-            <h4 className="font-bold text-sm text-white">Add New Restaurant Table</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-              <input
-                type="text"
-                placeholder="Table No (e.g. T-09)"
-                value={newTable.number}
-                onChange={(e) => setNewTable({ ...newTable, number: e.target.value })}
-                className="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
-              />
-              <input
-                type="text"
-                placeholder="Table Name (e.g. Patio Booth)"
-                value={newTable.name}
-                onChange={(e) => setNewTable({ ...newTable, name: e.target.value })}
-                className="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
-              />
-              <input
-                type="number"
-                min="1"
-                placeholder="Capacity (e.g. 4)"
-                value={newTable.capacity}
-                onChange={(e) => setNewTable({ ...newTable, capacity: parseInt(e.target.value) || 2 })}
-                className="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
-              />
-              <input
-                type="text"
-                placeholder="Section (e.g. Main Hall)"
-                value={newTable.section}
-                onChange={(e) => setNewTable({ ...newTable, section: e.target.value })}
-                className="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
-              />
-            </div>
-            <button
-              type="submit"
-              className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition"
-            >
-              <Plus className="w-4 h-4" />
-              Add Table
-            </button>
-          </form>
-
-          {/* Existing Tables List */}
-          <div className="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-3">
-            <h4 className="font-bold text-sm text-white">Existing Tables ({tables.length})</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-              {tables.map(t => (
-                <div key={t.id} className="p-3 bg-slate-800/40 rounded-xl border border-slate-800 flex justify-between items-center">
-                  <div>
-                    <h5 className="font-bold text-sm text-white">{t.number}</h5>
-                    <p className="text-xs text-slate-400">{t.name} • {t.capacity} Seats ({t.section})</p>
-                  </div>
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full border font-bold ${
-                    t.status === 'OCCUPIED' ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                  }`}>
-                    {t.status}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 3. MENU MANAGEMENT */}
+      {/* 2. MENU MANAGEMENT */}
       {activeTab === 'MENU' && (
         <div className="space-y-6 max-w-4xl">
           {/* Add Menu Item */}
@@ -413,4 +328,3 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
     </div>
   );
 };
-
