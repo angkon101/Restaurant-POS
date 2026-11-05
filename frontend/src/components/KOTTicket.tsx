@@ -118,3 +118,4 @@ const KOTContent: React.FC<{ kot: KOT }> = ({ kot }) => {
     </div>
   );
 };
+

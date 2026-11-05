@@ -249,3 +249,4 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ settings, paperSize })
     </div>
   );
 };
+

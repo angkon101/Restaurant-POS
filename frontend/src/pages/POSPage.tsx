@@ -266,3 +266,4 @@ export const POSPage: React.FC<POSPageProps> = ({
     </div>
   );
 };
+

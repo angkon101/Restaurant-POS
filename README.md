@@ -74,3 +74,4 @@ The POS interface will be live at: `http://localhost:5173`
 
 ## 🖨️ Thermal Printer Setup
 This POS features native CSS `@media print` rules calibrated for standard 58mm and 80mm ESC/POS thermal receipt printers. When clicking **"Print Bill"** or **"Print KOT"**, the system automatically prepares a clean receipt with zero unnecessary margins.
+

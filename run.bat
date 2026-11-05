@@ -43,3 +43,4 @@ echo Kitchen Display:    http://localhost:5173 (Click Kitchen tab)
 echo Backend API Docs:   http://localhost:8000/docs
 echo ===================================================
 echo.
+

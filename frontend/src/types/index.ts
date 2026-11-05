@@ -130,3 +130,4 @@ export interface TodayReport {
   };
   top_items: TopItemReport[];
 }
+

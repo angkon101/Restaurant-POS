@@ -121,3 +121,4 @@ export const TransferTableModal: React.FC<TransferTableModalProps> = ({
     </div>
   );
 };
+

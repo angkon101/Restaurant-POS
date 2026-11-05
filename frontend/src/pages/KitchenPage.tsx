@@ -262,3 +262,4 @@ export const KitchenPage: React.FC<KitchenPageProps> = ({ paperSize }) => {
     </div>
   );
 };
+

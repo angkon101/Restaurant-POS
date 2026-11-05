@@ -228,3 +228,4 @@ export const MenuCatalog: React.FC<MenuCatalogProps> = ({
     </div>
   );
 };
+

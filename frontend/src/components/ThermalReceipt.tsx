@@ -218,3 +218,4 @@ const ReceiptContent: React.FC<ContentProps> = ({ order, settings, payment, curr
     </div>
   );
 };
+
