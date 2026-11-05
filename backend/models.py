@@ -124,14 +124,14 @@ class RestaurantSettings(Base):
     __tablename__ = "restaurant_settings"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(100), default="Mini Bistro POS")
+    name = Column(String(100), default="Mijan's Restaurant")
     tagline = Column(String(150), default="Fresh & Delicious")
-    address = Column(String(255), default="123 Food Street, Downtown")
-    phone = Column(String(50), default="+1 (555) 019-2834")
-    currency_symbol = Column(String(10), default="$")
+    address = Column(String(255), default="Dhanmondi, Dhaka, Bangladesh")
+    phone = Column(String(50), default="+880 1712-345678")
+    currency_symbol = Column(String(10), default="৳")
     tax_percentage = Column(Float, default=5.0)
     service_charge_percentage = Column(Float, default=0.0)
-    receipt_header = Column(Text, default="Welcome to Mini Bistro")
-    receipt_footer = Column(Text, default="Thank you for visiting! Please come again.")
+    receipt_header = Column(Text, default="Welcome to Mijan's Restaurant")
+    receipt_footer = Column(Text, default="Thank you for dining with us! Please come again.")
     printer_paper_size = Column(String(10), default="80mm")  # 80mm or 58mm
 

@@ -19,7 +19,7 @@ export const ThermalReceipt: React.FC<ThermalReceiptProps> = ({
   onClose,
   autoPrint = false
 }) => {
-  const currency = settings?.currency_symbol || '$';
+  const currency = settings?.currency_symbol || '৳';
   const is58mm = paperSize === '58mm';
 
   React.useEffect(() => {
@@ -36,19 +36,19 @@ export const ThermalReceipt: React.FC<ThermalReceiptProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto">
       {/* Container - on screen it displays a preview card, during @media print only receipt prints */}
-      <div className="bg-white text-black rounded-xl shadow-2xl max-w-md w-full overflow-hidden flex flex-col no-print">
+      <div className="bg-white text-slate-800 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden flex flex-col no-print border border-slate-200">
         {/* Modal Controls */}
-        <div className="flex items-center justify-between px-6 py-4 bg-slate-800 text-white border-b border-slate-700">
+        <div className="flex items-center justify-between px-6 py-4 bg-[#026cb6] text-white">
           <div className="flex items-center gap-2">
-            <Printer className="w-5 h-5 text-emerald-400" />
-            <h3 className="font-semibold text-base">Receipt Preview ({paperSize})</h3>
+            <Printer className="w-5 h-5 text-white" />
+            <h3 className="font-bold text-base">Receipt Preview ({paperSize})</h3>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={handlePrint}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-medium transition"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-100 text-[#026cb6] rounded-lg text-xs font-bold transition shadow-xs"
             >
               <Printer className="w-4 h-4" />
               Print
@@ -56,7 +56,7 @@ export const ThermalReceipt: React.FC<ThermalReceiptProps> = ({
             {onClose && (
               <button
                 onClick={onClose}
-                className="p-1.5 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-white transition"
+                className="p-1.5 hover:bg-white/20 rounded-lg text-white/80 hover:text-white transition"
               >
                 <X className="w-5 h-5" />
               </button>

@@ -25,7 +25,7 @@ export const QuickPOSPage: React.FC<QuickPOSPageProps> = ({
   settings,
   onRefreshData
 }) => {
-  const currency = settings?.currency_symbol || '₹';
+  const currency = settings?.currency_symbol || '৳';
 
   // Order State
   const [cartItems, setCartItems] = useState<QuickCartItem[]>([]);
@@ -195,9 +195,9 @@ export const QuickPOSPage: React.FC<QuickPOSPageProps> = ({
   };
 
   return (
-    <div className="flex-1 flex justify-center bg-slate-900 overflow-y-auto p-0 sm:py-4">
+    <div className="flex-1 flex justify-center bg-slate-100 overflow-y-auto p-0 sm:py-4">
       {/* Handheld Device Shell (Matches exact mobile mockup) */}
-      <div className="w-full max-w-md bg-[#f1f5f9] min-h-screen sm:min-h-[820px] sm:max-h-[860px] sm:rounded-[36px] shadow-2xl border-0 sm:border-8 sm:border-slate-800 flex flex-col overflow-hidden relative font-sans">
+      <div className="w-full max-w-md bg-[#f8fafc] min-h-screen sm:min-h-[820px] sm:max-h-[860px] sm:rounded-[36px] shadow-lg border-0 sm:border sm:border-slate-300 flex flex-col overflow-hidden relative font-sans">
         
         {/* Status Bar (Time, Battery, Wi-Fi) */}
         <div className="bg-[#026cb6] text-white px-5 pt-2 pb-1 flex items-center justify-between text-xs font-semibold select-none">

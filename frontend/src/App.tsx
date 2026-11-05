@@ -14,15 +14,15 @@ export const App: React.FC = () => {
   // Application Data States
   const [settings, setSettings] = useState<Settings>({
     id: 1,
-    name: "Mijan's Mini Bistro",
-    tagline: 'Artisan Burgers, Pizza & Refreshing Drinks',
-    address: '42 Culinary Avenue, Downtown Food Street',
-    phone: '+1 (555) 789-2041',
-    currency_symbol: '$',
+    name: "Mijan's Restaurant",
+    tagline: 'Fresh, Delicious & Quick Everyday',
+    address: 'Dhanmondi, Dhaka, Bangladesh',
+    phone: '+880 1712-345678',
+    currency_symbol: '৳',
     tax_percentage: 5.0,
     service_charge_percentage: 0.0,
-    receipt_header: "Welcome to Mijan's Mini Bistro!",
-    receipt_footer: 'Thank you for dining with us! Have a wonderful day.',
+    receipt_header: "Welcome to Mijan's Restaurant!",
+    receipt_footer: 'Thank you for dining with us! Please come again.',
     printer_paper_size: '80mm'
   });
   const [categories, setCategories] = useState<Category[]>([]);
@@ -105,7 +105,7 @@ export const App: React.FC = () => {
   }, [loadData]);
 
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden bg-slate-950 font-sans">
+    <div className="flex flex-col h-screen w-screen overflow-hidden bg-slate-100 text-slate-800 font-sans">
       {/* Backend Disconnected Notice */}
       {backendError && (
         <div className="bg-red-900/90 text-white text-xs px-4 py-2 text-center font-bold flex items-center justify-center gap-2 no-print border-b border-red-700">
@@ -152,7 +152,7 @@ export const App: React.FC = () => {
           <SettingsPage
             categories={categories}
             menuItems={menuItems}
-            currencySymbol={settings.currency_symbol || '$'}
+            currencySymbol={settings.currency_symbol || '৳'}
             onRefreshData={loadData}
           />
         )}
