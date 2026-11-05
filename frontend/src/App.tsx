@@ -121,15 +121,13 @@ export const App: React.FC = () => {
         </div>
       )}
 
-      {/* Desktop Navigation Header - ONLY displayed in Desktop Mode on PC / laptop */}
-      <div className="hidden md:block shrink-0">
-        <Navbar
-          currentTab={currentTab}
-          onSelectTab={setCurrentTab}
-          settings={settings}
-          isWsConnected={isWsConnected}
-        />
-      </div>
+      {/* App Bar (Unified across Desktop and Mobile) */}
+      <Navbar
+        currentTab={currentTab}
+        onSelectTab={setCurrentTab}
+        settings={settings}
+        isWsConnected={isWsConnected}
+      />
 
       {/* Main View Area */}
       <main className="flex-1 flex overflow-hidden">
