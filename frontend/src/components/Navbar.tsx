@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Zap, BarChart3, Settings as SettingsIcon, Menu, X } from 'lucide-react';
+import { Zap, BarChart3, Utensils, Menu, X } from 'lucide-react';
 import { Settings } from '../types';
 
 export type NavTab = 'POS' | 'REPORTS' | 'SETTINGS';
@@ -89,8 +89,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               : 'text-slate-400 hover:text-slate-200'
           }`}
         >
-          <SettingsIcon className="w-3.5 h-3.5" />
-          Settings &amp; Menu
+          <Utensils className="w-3.5 h-3.5" />
+          Menu Catalog
         </button>
       </nav>
 
@@ -147,8 +147,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               currentTab === 'SETTINGS' ? 'bg-emerald-600 text-white' : 'text-slate-300 hover:bg-slate-800'
             }`}
           >
-            <SettingsIcon className="w-4 h-4 text-slate-400" />
-            Settings &amp; Menu Catalog
+            <Utensils className="w-4 h-4 text-emerald-400" />
+            Menu Catalog Admin
           </button>
         </div>
       )}

@@ -147,14 +147,13 @@ export const App: React.FC = () => {
           />
         )}
 
-        {/* Admin Settings & Menu Catalog */}
+        {/* Menu Catalog Admin */}
         {currentTab === 'SETTINGS' && (
           <SettingsPage
-            settings={settings}
             categories={categories}
             menuItems={menuItems}
+            currencySymbol={settings.currency_symbol || '$'}
             onRefreshData={loadData}
-            onUpdateSettings={setSettings}
           />
         )}
       </main>
