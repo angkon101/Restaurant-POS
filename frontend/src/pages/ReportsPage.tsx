@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { DollarSign, Receipt, TrendingUp, CreditCard, Banknote, Smartphone, Printer, RefreshCw, Calendar } from 'lucide-react';
+import { DollarSign, Receipt, TrendingUp, CreditCard, Banknote, Smartphone, Printer, RefreshCw, Calendar, ArrowLeft } from 'lucide-react';
 import { TodayReport, Settings } from '../types';
 import { api } from '../services/api';
 
 interface ReportsPageProps {
   settings: Settings;
   paperSize: '80mm' | '58mm';
+  onBackToPOS?: () => void;
 }
 
-export const ReportsPage: React.FC<ReportsPageProps> = ({ settings, paperSize }) => {
+export const ReportsPage: React.FC<ReportsPageProps> = ({ settings, paperSize, onBackToPOS }) => {
   const currency = settings?.currency_symbol || '৳';
   const [report, setReport] = useState<TodayReport | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -39,6 +40,18 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ settings, paperSize })
 
   return (
     <div className="flex-1 flex flex-col h-full bg-slate-50 text-slate-800 overflow-y-auto p-4 sm:p-6 space-y-6">
+      {/* Mobile Back to POS Button */}
+      {onBackToPOS && (
+        <button
+          type="button"
+          onClick={onBackToPOS}
+          className="md:hidden flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-100 text-[#026cb6] rounded-xl text-xs font-bold border border-slate-200 shadow-xs w-fit"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Back to Order Terminal</span>
+        </button>
+      )}
+
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-xs no-print">
         <div>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, Utensils } from 'lucide-react';
+import { Plus, Trash2, Utensils, ArrowLeft } from 'lucide-react';
 import { Category, MenuItem } from '../types';
 import { api } from '../services/api';
 
@@ -8,13 +8,15 @@ interface SettingsPageProps {
   menuItems: MenuItem[];
   currencySymbol?: string;
   onRefreshData: () => void;
+  onBackToPOS?: () => void;
 }
 
 export const SettingsPage: React.FC<SettingsPageProps> = ({
   categories,
   menuItems,
   currencySymbol = '৳',
-  onRefreshData
+  onRefreshData,
+  onBackToPOS
 }) => {
   // New item form state
   const [newMenuItem, setNewMenuItem] = useState({
@@ -76,6 +78,18 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
 
   return (
     <div className="flex-1 flex flex-col h-full bg-slate-50 text-slate-800 overflow-y-auto p-4 sm:p-6 space-y-6">
+      {/* Mobile Back to POS Button */}
+      {onBackToPOS && (
+        <button
+          type="button"
+          onClick={onBackToPOS}
+          className="md:hidden flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-100 text-[#026cb6] rounded-xl text-xs font-bold border border-slate-200 shadow-xs w-fit"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Back to Order Terminal</span>
+        </button>
+      )}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-4">
         <div>

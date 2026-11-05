@@ -121,8 +121,8 @@ export const App: React.FC = () => {
         </div>
       )}
 
-      {/* Navigation Header (Visible on desktop or when navigating Reports/Settings on mobile) */}
-      <div className={currentTab === 'POS' ? 'hidden md:block' : 'block'}>
+      {/* Desktop Navigation Header - ONLY displayed in Desktop Mode on PC / laptop */}
+      <div className="hidden md:block shrink-0">
         <Navbar
           currentTab={currentTab}
           onSelectTab={setCurrentTab}
@@ -150,6 +150,7 @@ export const App: React.FC = () => {
           <ReportsPage
             settings={settings}
             paperSize={settings.printer_paper_size || '80mm'}
+            onBackToPOS={() => setCurrentTab('POS')}
           />
         )}
 
@@ -160,6 +161,7 @@ export const App: React.FC = () => {
             menuItems={menuItems}
             currencySymbol={settings.currency_symbol || '৳'}
             onRefreshData={loadData}
+            onBackToPOS={() => setCurrentTab('POS')}
           />
         )}
       </main>
