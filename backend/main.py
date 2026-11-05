@@ -14,7 +14,7 @@ from seed import seed_database
 # Create tables on startup
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="Mini Restaurant POS Backend", version="1.0.0")
+app = FastAPI(title="Mini Restaurant POS Backend", version="2.0.0")
 
 # CORS setup
 app.add_middleware(
