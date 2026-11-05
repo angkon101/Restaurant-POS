@@ -109,3 +109,4 @@ export const QuickProductCard: React.FC<QuickProductCardProps> = ({
     </div>
   );
 };
+

@@ -8,6 +8,7 @@ import { SettingsPage } from './pages/SettingsPage';
 import { Table, Category, MenuItem, Order, KOT, Settings } from './types';
 import { api, WS_URL } from './services/api';
 import { sound } from './services/sound';
+import { Agentation } from 'agentation';
 
 export const App: React.FC = () => {
   // Default to Version 2 Quick Order POS
@@ -195,6 +196,9 @@ export const App: React.FC = () => {
           />
         )}
       </main>
+
+      {/* Visual Agentation Feedback Tool for AI Editing */}
+      <Agentation endpoint="http://localhost:4747" appName="Mini Restaurant POS" />
     </div>
   );
 };

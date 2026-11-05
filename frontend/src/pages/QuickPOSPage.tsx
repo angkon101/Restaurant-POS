@@ -332,3 +332,4 @@ export const QuickPOSPage: React.FC<QuickPOSPageProps> = ({
     </div>
   );
 };
+

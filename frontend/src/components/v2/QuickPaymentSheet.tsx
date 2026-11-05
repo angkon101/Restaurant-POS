@@ -234,3 +234,4 @@ export const QuickPaymentSheet: React.FC<QuickPaymentSheetProps> = ({
     </div>
   );
 };
+

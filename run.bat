@@ -32,15 +32,21 @@ if not exist "backend\restaurant_pos.db" (
 echo [INFO] Starting FastAPI Backend on port 8000...
 start "POS Backend (FastAPI)" cmd /k "cd /d %~dp0backend && python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
 
+echo [INFO] Starting Agentation MCP Server on port 4747...
+start "Agentation Server" cmd /k "npx -y agentation-mcp server"
+
 echo [INFO] Starting React Frontend on port 5173...
 start "POS Frontend (React)" cmd /k "cd /d %~dp0frontend && npm run dev -- --host"
 
 echo.
 echo ===================================================
 echo POS is starting up!
-echo Counter / Terminal: http://localhost:5173
-echo Kitchen Display:    http://localhost:5173 (Click Kitchen tab)
-echo Backend API Docs:   http://localhost:8000/docs
+echo Counter / Terminal:  http://localhost:5173
+echo Kitchen Display:     http://localhost:5173 (Click Kitchen tab)
+echo Agentation Toolbar:  Visible in bottom-right corner of POS
+echo Agentation Sync:     http://localhost:4747
+echo Backend API Docs:    http://localhost:8000/docs
 echo ===================================================
+
 echo.
 
