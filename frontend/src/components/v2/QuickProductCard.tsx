@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Minus, Utensils, Pizza, Flame, Coffee, IceCream } from 'lucide-react';
+import { Minus, Plus } from 'lucide-react';
 import { MenuItem } from '../../types';
 
 interface QuickProductCardProps {
@@ -17,96 +17,79 @@ export const QuickProductCard: React.FC<QuickProductCardProps> = ({
   onAdd,
   onDecrement
 }) => {
-  const isSelected = quantity > 0;
-
-  // Food icon helper based on SKU or Category
-  const getProductIcon = () => {
-    const sku = item.sku || '';
-    if (sku.startsWith('PIZ')) return Pizza;
-    if (sku.startsWith('APP')) return Flame;
-    if (sku.startsWith('DRK')) return Coffee;
-    if (sku.startsWith('DST')) return IceCream;
-    return Utensils;
-  };
-
-  const Icon = getProductIcon();
+  const firstLetter = item.name.trim().charAt(0).toUpperCase();
 
   return (
     <div
       onClick={() => onAdd(item)}
-      className={`relative flex flex-col justify-between p-3.5 sm:p-4 rounded-2xl border-2 transition-all duration-150 cursor-pointer select-none active:scale-95 ${
-        isSelected
-          ? 'bg-emerald-950/30 border-emerald-500 shadow-md shadow-emerald-950/40 ring-1 ring-emerald-500/50'
-          : 'bg-slate-900/90 border-slate-800 hover:border-slate-700 hover:bg-slate-800/60 shadow-sm'
-      }`}
+      className="bg-white rounded-xl shadow-sm border border-slate-200/80 hover:border-blue-400 overflow-hidden flex flex-col justify-between transition-all active:scale-[0.98] select-none cursor-pointer"
     >
-      {/* Active Quantity Badge in top-right */}
-      {isSelected && (
-        <div className="absolute -top-2.5 -right-2.5 bg-emerald-500 text-slate-950 text-xs font-black px-2.5 py-0.5 rounded-full shadow-lg border-2 border-slate-950 flex items-center justify-center animate-in zoom-in-75">
-          {quantity}x
-        </div>
-      )}
+      {/* Product Image / Placeholder Letter Header with Floating Price Tag */}
+      <div className="relative w-full h-24 sm:h-28 bg-slate-50 flex items-center justify-center overflow-hidden">
+        {item.image_url ? (
+          <img
+            src={item.image_url}
+            alt={item.name}
+            className="w-full h-full object-cover"
+            loading="lazy"
+            onError={(e) => {
+              // Fallback to letter on image error
+              (e.target as HTMLElement).style.display = 'none';
+            }}
+          />
+        ) : null}
 
-      {/* Card Body */}
-      <div>
-        <div className="flex items-center justify-between gap-2 mb-2">
-          <div className={`p-2 rounded-xl ${isSelected ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-400'}`}>
-            <Icon className="w-5 h-5" />
-          </div>
-          {item.sku && (
-            <span className="text-[10px] font-mono text-slate-500">{item.sku}</span>
-          )}
-        </div>
-
-        <h3 className="font-extrabold text-sm sm:text-base text-white leading-tight mb-1 line-clamp-2">
-          {item.name}
-        </h3>
-        
-        {item.description && (
-          <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed mb-3">
-            {item.description}
-          </p>
-        )}
-      </div>
-
-      {/* Bottom Price & Controls */}
-      <div className="flex items-center justify-between pt-2 border-t border-slate-800/80 mt-1" onClick={(e) => e.stopPropagation()}>
-        <span className="font-black text-sm sm:text-base text-emerald-400">
-          {currencySymbol}{item.price.toFixed(2)}
+        {/* Fallback Letter Avatar if no image or image hidden */}
+        <span className="text-3xl sm:text-4xl font-black text-slate-800 tracking-wider absolute">
+          {firstLetter}
         </span>
 
-        {isSelected ? (
-          <div className="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-700">
-            <button
-              type="button"
-              onClick={() => onDecrement(item)}
-              className="w-7 h-7 flex items-center justify-center bg-slate-800 hover:bg-slate-700 active:bg-slate-600 rounded-lg text-slate-200 transition"
-              title="Minus 1"
-            >
-              <Minus className="w-3.5 h-3.5" />
-            </button>
-            <span className="font-bold text-xs text-white px-1">{quantity}</span>
-            <button
-              type="button"
-              onClick={() => onAdd(item)}
-              className="w-7 h-7 flex items-center justify-center bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-400 rounded-lg text-white transition shadow-sm"
-              title="Add 1"
-            >
-              <Plus className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => onAdd(item)}
-            className="flex items-center gap-1 px-3 py-1.5 bg-slate-800 hover:bg-emerald-600 active:bg-emerald-700 text-slate-200 hover:text-white rounded-xl text-xs font-bold transition border border-slate-700 hover:border-emerald-500"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            Add
-          </button>
-        )}
+        {/* Price Badge in Top-Right Corner */}
+        <div className="absolute top-1.5 right-1.5 bg-black/85 text-white text-[11px] font-bold px-2 py-0.5 rounded-full shadow-sm z-10 flex items-center gap-0.5">
+          <span>{currencySymbol}</span>
+          <span>{item.price.toFixed(0)}</span>
+        </div>
+      </div>
+
+      {/* Middle: Title */}
+      <div className="px-2 pt-2 pb-1 text-center">
+        <h4 className="font-bold text-[11px] sm:text-xs text-slate-800 leading-snug line-clamp-2 min-h-[28px] flex items-center justify-center">
+          {item.name}
+        </h4>
+      </div>
+
+      {/* Bottom: Stepper Row with Red (-) and Green (+) */}
+      <div
+        className="px-2 pb-2.5 pt-1 flex items-center justify-center gap-2.5"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          type="button"
+          onClick={() => onDecrement(item)}
+          disabled={quantity <= 0}
+          className={`w-6 h-6 rounded-full flex items-center justify-center text-white font-bold transition shadow-sm active:scale-90 ${
+            quantity > 0
+              ? 'bg-red-500 hover:bg-red-600 active:bg-red-700'
+              : 'bg-red-200 text-red-100 cursor-not-allowed opacity-50'
+          }`}
+          title="Decrease"
+        >
+          <Minus className="w-3.5 h-3.5 stroke-[3]" />
+        </button>
+
+        <span className="font-bold text-xs sm:text-sm text-slate-800 w-4 text-center">
+          {quantity}
+        </span>
+
+        <button
+          type="button"
+          onClick={() => onAdd(item)}
+          className="w-6 h-6 rounded-full bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 active:scale-90 text-white flex items-center justify-center font-bold transition shadow-sm"
+          title="Increase"
+        >
+          <Plus className="w-3.5 h-3.5 stroke-[3]" />
+        </button>
       </div>
     </div>
   );
 };
-

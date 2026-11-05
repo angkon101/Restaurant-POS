@@ -9,189 +9,242 @@ def seed_database():
     settings = db.query(models.RestaurantSettings).first()
     if not settings:
         settings = models.RestaurantSettings(
-            name="Mijan's Mini Bistro",
-            tagline="Artisan Burgers, Pizza & Refreshing Drinks",
-            address="42 Culinary Avenue, Downtown Food Street",
-            phone="+1 (555) 789-2041",
-            currency_symbol="$",
+            name="Mijan's Restaurant",
+            tagline="Delicious Food & Quick Service",
+            address="42 Food Boulevard, City Center",
+            phone="+91 98765 43210",
+            currency_symbol="₹",
             tax_percentage=5.0,
             service_charge_percentage=0.0,
-            receipt_header="Welcome to Mijan's Mini Bistro!",
-            receipt_footer="Thank you for dining with us! Have a wonderful day.",
+            receipt_header="Welcome to Mijan's Restaurant!",
+            receipt_footer="Thank you for your visit! Please come again.",
             printer_paper_size="80mm"
         )
         db.add(settings)
+    else:
+        # Default currency to ₹ to match user's requested mockup
+        settings.currency_symbol = "₹"
 
-    # 2. Seed Tables if not exists
-    if db.query(models.Table).count() == 0:
-        default_tables = [
-            {"number": "T-01", "name": "Window Booth 1", "capacity": 2, "section": "Window Side"},
-            {"number": "T-02", "name": "Window Booth 2", "capacity": 4, "section": "Window Side"},
-            {"number": "T-03", "name": "Central Table 1", "capacity": 4, "section": "Main Hall"},
-            {"number": "T-04", "name": "Central Table 2", "capacity": 4, "section": "Main Hall"},
-            {"number": "T-05", "name": "Family Round 1", "capacity": 6, "section": "Main Hall"},
-            {"number": "T-06", "name": "Family Round 2", "capacity": 8, "section": "Main Hall"},
-            {"number": "T-07", "name": "Patio Table A", "capacity": 2, "section": "Outdoor Patio"},
-            {"number": "T-08", "name": "Patio Table B", "capacity": 4, "section": "Outdoor Patio"},
-            {"number": "BAR-1", "name": "Bar Stool 1", "capacity": 1, "section": "Bar Counter"},
-            {"number": "BAR-2", "name": "Bar Stool 2", "capacity": 1, "section": "Bar Counter"},
-        ]
-        for t in default_tables:
-            db.add(models.Table(**t, status="AVAILABLE"))
+    # 2. Categories matching the mobile mockup
+    cat_names = [
+        {"name": "Starters", "icon": "Flame", "sort_order": 1},
+        {"name": "Soups", "icon": "Coffee", "sort_order": 2},
+        {"name": "Main Course - Veg", "icon": "Utensils", "sort_order": 3},
+        {"name": "Main Course - Non-Veg", "icon": "Utensils", "sort_order": 4},
+        {"name": "Breads & Rice", "icon": "Pizza", "sort_order": 5},
+        {"name": "Beverages", "icon": "Coffee", "sort_order": 6},
+        {"name": "Desserts", "icon": "IceCream", "sort_order": 7},
+    ]
 
-    # 3. Seed Categories if not exists
-    if db.query(models.Category).count() == 0:
-        categories_data = [
-            {"name": "Burgers & Sandwiches", "icon": "Utensils", "sort_order": 1},
-            {"name": "Wood-Fired Pizza", "icon": "Pizza", "sort_order": 2},
-            {"name": "Appetizers & Sides", "icon": "Flame", "sort_order": 3},
-            {"name": "Refreshing Drinks", "icon": "Coffee", "sort_order": 4},
-            {"name": "Sweet Desserts", "icon": "IceCream", "sort_order": 5},
-        ]
-        cat_map = {}
-        for c in categories_data:
-            cat = models.Category(**c)
-            db.add(cat)
-            db.flush()
-            cat_map[cat.name] = cat.id
+    # Clean old items and reseed with exact screenshot items
+    db.query(models.MenuItem).delete()
+    db.query(models.Category).delete()
+    db.flush()
 
-        # 4. Seed Menu Items
-        menu_items_data = [
-            # Burgers
-            {
-                "category_id": cat_map["Burgers & Sandwiches"],
-                "name": "Classic Cheeseburger",
-                "description": "Juicy beef patty, cheddar, lettuce, tomato, house secret sauce on brioche",
-                "price": 8.50,
-                "sku": "BGR-01"
-            },
-            {
-                "category_id": cat_map["Burgers & Sandwiches"],
-                "name": "Double Smash Bacon Burger",
-                "description": "Two crispy-edged smash patties, smoky beef bacon, double American cheese",
-                "price": 11.99,
-                "sku": "BGR-02"
-            },
-            {
-                "category_id": cat_map["Burgers & Sandwiches"],
-                "name": "Spicy Crispy Chicken Burger",
-                "description": "Fried chicken breast, jalapeño slaw, spicy chipotle mayo",
-                "price": 9.50,
-                "sku": "BGR-03"
-            },
-            {
-                "category_id": cat_map["Burgers & Sandwiches"],
-                "name": "Grilled Truffle Mushroom Melt",
-                "description": "Sautéed portobello, Swiss cheese, truffle aioli on toasted sourdough",
-                "price": 9.00,
-                "sku": "BGR-04"
-            },
+    cat_map = {}
+    for c in cat_names:
+        cat = models.Category(**c)
+        db.add(cat)
+        db.flush()
+        cat_map[cat.name] = cat.id
 
-            # Pizza
-            {
-                "category_id": cat_map["Wood-Fired Pizza"],
-                "name": "Margherita Classica",
-                "description": "San Marzano tomato sauce, fresh buffalo mozzarella, fresh basil, EVOO",
-                "price": 12.00,
-                "sku": "PIZ-01"
-            },
-            {
-                "category_id": cat_map["Wood-Fired Pizza"],
-                "name": "Pepperoni Rustica",
-                "description": "Crispy pepperoni cups, mozzarella, hot honey drizzle, oregano",
-                "price": 14.50,
-                "sku": "PIZ-02"
-            },
-            {
-                "category_id": cat_map["Wood-Fired Pizza"],
-                "name": "BBQ Smoky Chicken Pizza",
-                "description": "Grilled BBQ chicken, red onions, smoked gouda, cilantro",
-                "price": 13.50,
-                "sku": "PIZ-03"
-            },
+    # 3. Seed Menu Items matching the user screenshot
+    menu_items_data = [
+        # Starters (matching screenshot)
+        {
+            "category_id": cat_map["Starters"],
+            "name": "Paneer Tikka",
+            "description": "Marinated cottage cheese cubes grilled in tandoor",
+            "price": 250.00,
+            "sku": "STR-01",
+            "image_url": "https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=400&auto=format&fit=crop&q=80"
+        },
+        {
+            "category_id": cat_map["Starters"],
+            "name": "Veg Spring Rolls",
+            "description": "Crispy rolled appetizer packed with julienned vegetables",
+            "price": 150.00,
+            "sku": "STR-02",
+            "image_url": "https://images.unsplash.com/photo-1544025162-d76694265947?w=400&auto=format&fit=crop&q=80"
+        },
+        {
+            "category_id": cat_map["Starters"],
+            "name": "Hara Bhara Kabab",
+            "description": "Pan-fried patties made with spinach, green peas and potatoes",
+            "price": 80.00,
+            "sku": "STR-03",
+            "image_url": "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=400&auto=format&fit=crop&q=80"
+        },
+        {
+            "category_id": cat_map["Starters"],
+            "name": "Tandoori Aloo",
+            "description": "Baby potatoes marinated in hung curd and aromatic spices",
+            "price": 220.00,
+            "sku": "STR-04",
+            "image_url": "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=400&auto=format&fit=crop&q=80"
+        },
+        {
+            "category_id": cat_map["Starters"],
+            "name": "Crispy Corn",
+            "description": "Fried sweet corn kernels tossed with spices and herbs",
+            "price": 200.00,
+            "sku": "STR-05",
+            "image_url": "https://images.unsplash.com/photo-1551782450-a2132b4ba21d?w=400&auto=format&fit=crop&q=80"
+        },
+        {
+            "category_id": cat_map["Starters"],
+            "name": "Paneer Malai Tikka",
+            "description": "Mild and creamy tandoori paneer skewers with cardamom",
+            "price": 150.00,
+            "sku": "STR-06",
+            "image_url": ""  # Letter fallback 'P' like screenshot!
+        },
+        {
+            "category_id": cat_map["Starters"],
+            "name": "Veg Manchurian Dry",
+            "description": "Crispy vegetable balls tossed in spicy garlic soy sauce",
+            "price": 200.00,
+            "sku": "STR-07",
+            "image_url": ""  # Letter fallback 'V' like screenshot!
+        },
+        {
+            "category_id": cat_map["Starters"],
+            "name": "Honey Chilli Potato",
+            "description": "Crisp fried potato fingers coated in sweet spicy sauce",
+            "price": 200.00,
+            "sku": "STR-08",
+            "image_url": ""  # Letter fallback 'H' like screenshot!
+        },
+        {
+            "category_id": cat_map["Starters"],
+            "name": "Tandoori Soya Chaap",
+            "description": "Protein-rich soya chunks marinated and roasted in clay oven",
+            "price": 100.00,
+            "sku": "STR-09",
+            "image_url": ""  # Letter fallback 'T' like screenshot!
+        },
 
-            # Appetizers
-            {
-                "category_id": cat_map["Appetizers & Sides"],
-                "name": "Crispy French Fries (Large)",
-                "description": "Golden salted skin-on fries served with herb dip",
-                "price": 4.00,
-                "sku": "APP-01"
-            },
-            {
-                "category_id": cat_map["Appetizers & Sides"],
-                "name": "Loaded Truffle Parmesan Fries",
-                "description": "Fries tossed in white truffle oil, grated aged parmesan, parsley",
-                "price": 6.50,
-                "sku": "APP-02"
-            },
-            {
-                "category_id": cat_map["Appetizers & Sides"],
-                "name": "Spicy Buffalo Wings (6 pcs)",
-                "description": "Crisp wings coated in tangy buffalo glaze with blue cheese dip",
-                "price": 7.50,
-                "sku": "APP-03"
-            },
-            {
-                "category_id": cat_map["Appetizers & Sides"],
-                "name": "Mozzarella Sticks (5 pcs)",
-                "description": "Golden fried cheese sticks with rich marinara dip",
-                "price": 5.50,
-                "sku": "APP-04"
-            },
+        # Soups
+        {
+            "category_id": cat_map["Soups"],
+            "name": "Hot & Sour Soup",
+            "description": "Spicy and tangy Asian vegetable broth with mushrooms",
+            "price": 120.00,
+            "sku": "SOP-01",
+            "image_url": "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400&auto=format&fit=crop&q=80"
+        },
+        {
+            "category_id": cat_map["Soups"],
+            "name": "Sweet Corn Soup",
+            "description": "Creamy corn kernel soup flavored with light pepper",
+            "price": 110.00,
+            "sku": "SOP-02",
+            "image_url": "https://images.unsplash.com/photo-1603105037880-880cd4edfb0d?w=400&auto=format&fit=crop&q=80"
+        },
+        {
+            "category_id": cat_map["Soups"],
+            "name": "Tomato Basil Shorba",
+            "description": "Traditional roasted tomato soup with fresh herbs",
+            "price": 100.00,
+            "sku": "SOP-03",
+            "image_url": ""
+        },
 
-            # Drinks
-            {
-                "category_id": cat_map["Refreshing Drinks"],
-                "name": "Fresh Mint Lemonade",
-                "description": "Freshly squeezed lemon juice, crushed mint, chilled club soda",
-                "price": 3.50,
-                "sku": "DRK-01"
-            },
-            {
-                "category_id": cat_map["Refreshing Drinks"],
-                "name": "Iced Vanilla Latte",
-                "description": "Double espresso, cold milk, artisanal vanilla bean syrup",
-                "price": 4.50,
-                "sku": "DRK-02"
-            },
-            {
-                "category_id": cat_map["Refreshing Drinks"],
-                "name": "Craft Peach Iced Tea",
-                "description": "Brewed black tea infused with sweet peach nectar",
-                "price": 3.80,
-                "sku": "DRK-03"
-            },
-            {
-                "category_id": cat_map["Refreshing Drinks"],
-                "name": "Cola / Soda Can (330ml)",
-                "description": "Chilled sparkling beverage",
-                "price": 2.00,
-                "sku": "DRK-04"
-            },
+        # Main Course - Veg
+        {
+            "category_id": cat_map["Main Course - Veg"],
+            "name": "Paneer Butter Masala",
+            "description": "Rich and creamy tomato makhani gravy with soft paneer cubes",
+            "price": 280.00,
+            "sku": "MCV-01",
+            "image_url": "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=400&auto=format&fit=crop&q=80"
+        },
+        {
+            "category_id": cat_map["Main Course - Veg"],
+            "name": "Dal Makhani",
+            "description": "Slow-cooked black lentils simmered with butter and cream",
+            "price": 240.00,
+            "sku": "MCV-02",
+            "image_url": "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400&auto=format&fit=crop&q=80"
+        },
+        {
+            "category_id": cat_map["Main Course - Veg"],
+            "name": "Kadhai Paneer",
+            "description": "Cottage cheese with bell peppers in spicy freshly ground kadhai masala",
+            "price": 260.00,
+            "sku": "MCV-03",
+            "image_url": ""
+        },
 
-            # Desserts
-            {
-                "category_id": cat_map["Sweet Desserts"],
-                "name": "Warm Molten Lava Cake",
-                "description": "Decadent chocolate cake with molten center & vanilla gelato scoop",
-                "price": 6.50,
-                "sku": "DST-01"
-            },
-            {
-                "category_id": cat_map["Sweet Desserts"],
-                "name": "New York Cheesecake",
-                "description": "Creamy baked cheesecake with strawberry compote drizzle",
-                "price": 5.50,
-                "sku": "DST-02"
-            },
-        ]
-        for m in menu_items_data:
-            db.add(models.MenuItem(**m, is_available=True))
+        # Breads & Rice
+        {
+            "category_id": cat_map["Breads & Rice"],
+            "name": "Butter Naan",
+            "description": "Soft leavened bread brushed with rich butter",
+            "price": 45.00,
+            "sku": "BRD-01",
+            "image_url": "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=400&auto=format&fit=crop&q=80"
+        },
+        {
+            "category_id": cat_map["Breads & Rice"],
+            "name": "Garlic Naan",
+            "description": "Tandoori flatbread topped with minced roasted garlic & coriander",
+            "price": 60.00,
+            "sku": "BRD-02",
+            "image_url": ""
+        },
+        {
+            "category_id": cat_map["Breads & Rice"],
+            "name": "Jeera Rice",
+            "description": "Fragrant basmati rice tempered with cumin seeds and ghee",
+            "price": 140.00,
+            "sku": "BRD-03",
+            "image_url": ""
+        },
+
+        # Beverages
+        {
+            "category_id": cat_map["Beverages"],
+            "name": "Fresh Lime Soda",
+            "description": "Chilled soda with fresh lime juice, sweet or salted",
+            "price": 60.00,
+            "sku": "BEV-01",
+            "image_url": "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=400&auto=format&fit=crop&q=80"
+        },
+        {
+            "category_id": cat_map["Beverages"],
+            "name": "Sweet Mango Lassi",
+            "description": "Thick traditional yogurt shake blended with sweet mango pulp",
+            "price": 90.00,
+            "sku": "BEV-02",
+            "image_url": "https://images.unsplash.com/photo-1527661591475-527312dd65f5?w=400&auto=format&fit=crop&q=80"
+        },
+
+        # Desserts
+        {
+            "category_id": cat_map["Desserts"],
+            "name": "Gulab Jamun (2 pcs)",
+            "description": "Warm golden milk-solid dumplings soaked in rose saffron syrup",
+            "price": 70.00,
+            "sku": "DES-01",
+            "image_url": "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=400&auto=format&fit=crop&q=80"
+        },
+        {
+            "category_id": cat_map["Desserts"],
+            "name": "Vanilla Ice Cream",
+            "description": "Rich creamy vanilla scoop with chocolate drizzle",
+            "price": 60.00,
+            "sku": "DES-02",
+            "image_url": ""
+        }
+    ]
+
+    for m in menu_items_data:
+        db.add(models.MenuItem(**m, is_available=True))
 
     db.commit()
     db.close()
-    print("Database seeding completed successfully.")
+    print("Database reseeded with mobile mockup menu items successfully.")
 
 if __name__ == "__main__":
     seed_database()
